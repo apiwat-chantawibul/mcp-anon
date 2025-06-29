@@ -1,0 +1,31 @@
+name: mcp-anon
+
+x-mcp-anon-common-config: &mcp-anon-common-config
+  image: mcp-anon
+  pull_policy: never
+  build:
+    context: .
+  # Mount for live editing while dev
+  volumes:
+    - type: bind
+      source: ./src
+      target: /opt/app/src
+
+services:
+  mcp-anon:
+    <<: *mcp-anon-common-config
+    entrypoint:
+    - python
+    - -im
+    - app
+  test:
+    <<: *mcp-anon-common-config
+    entrypoint:
+    - python
+    - -m
+    - pytest
+    - --pyargs
+    - app
+    profiles:
+    - test
+

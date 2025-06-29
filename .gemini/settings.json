@@ -1,0 +1,16 @@
+{
+  "mcpServers": {
+    "anon": {
+      "command": "docker",
+      "args": [
+        "compose",
+        "run",
+        "--rm",
+        "-v",
+        "${PWD}:/opt/app/workdir",
+        "mcp-anon"
+      ]
+    }
+  }
+}
+

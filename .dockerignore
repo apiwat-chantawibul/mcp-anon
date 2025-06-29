@@ -1,0 +1,6 @@
+# version control
+.git
+
+# Temporary files
+**/.*.swp
+
