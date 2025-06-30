@@ -16,34 +16,30 @@ mcp = FastMCP(
         This server contains tools to examine sensitive dataset
         and build an automated pipeline that export anonymized data from it.
 
-        There are 4 groups of tools:
+        Tools are named with `OBJECT_` prefix to indicate the object they operate on.
+        An additional prefix, such as `OBJECT_ACTION_`, specifies the action performed on that object.
+        For example,
 
-        1. "select" dataset
-        2. "examine" dataset
-        3. "build" pipeline
-        4. "evaluate" pipeline
+        - `dataset_*` tools perform actions on dataset.
+        - `dataset_select_*` tools allow client to select datasource that is the target of anonymization pipeline.
+          The server must already have access to the datasource selected.
+          The client merely "select" which dataset to work on.
+        - `dataset_examine_*` tools allow client to see limited views of end user's sensitve dataset.
+          Client can obtain dataset schemas, statistics, and synthetic examples but not the underlying sensitive data.
+          Client can use "examine" tools to get and understanding of the hidden dataset
+          and then use "build" tools to construct procedure that will export anonymized dataset.
 
-        "select" tools allow client to select datasource that is the target for anonymization.
-        The server must already have access to the datasource selected.
-        The client merely "select" which dataset to work on.
-
-        "examine" tools allow client to see limited views of end user's sensitve dataset.
-        Client can obtain dataset schemas, statistics, and synthetic examples but not the underlying sensitive data.
-        Client can use "examine" tools to get and understanding of the hidden dataset
-        and then use "build" tools to construct procedure that will export anonymized dataset.
-
-        "build" tools allow client to add, edit, delete steps of data anonymization pipeline.
-        "build" tools also provide introspection tools that let client review the shape of current pipeline
-        and the Python code that would be produced.
-
-        "evaluate" measures the level of anonymity that current pipeline satisfy.
-        For example, it can check that data resulting fromt the pipeline satisfy which level of k-anonymity.
+        - `pipeline_*` tools perform actions on anonymization pipeline being built such as
+          adding, editing, or deleting steps in the pipeline.
+        - `pipeline_examine_*` tools allow client to review the current shape of pipeline and the Python code that would be produced.
+        - `pipeline_evaluate_*` measures the level of anonymity that current pipeline satisfy.
+          For example, it can check that data resulting fromt the pipeline satisfy which level of k-anonymity.
     """,
 )
 
 
 @mcp.tool
-async def select_csv_file(path: str) -> bool:
+async def dataset_select_csv_file(path: str) -> bool:
     """Select a CSV file as datasource to be anonymized.
 
     The server will remember the selected source in further interaction.
@@ -54,7 +50,7 @@ async def select_csv_file(path: str) -> bool:
 
 
 @mcp.tool
-async def examine_schema() -> str:
+async def dataset_examine_schema() -> str:
     """Get name and datatype of each field in the selected datasource.
 
     The returned data will be a CSV where:
