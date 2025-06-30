@@ -8,7 +8,8 @@ import pandas as pd
 
 # Server state
 state = {
-    'datasource': None,
+    'dataset': None,
+    'pipeline': [],
 }
 
 
@@ -59,8 +60,7 @@ async def dataset_select_csv_file(
     The server will remember the selected source in further interaction.
     """
     path = Path(path)
-    # TODO: Handle error
-    state['datasource'] = pd.read_csv(path)
+    state['dataset'] = pd.read_csv(path)
 
 
 @mcp.tool
@@ -69,12 +69,11 @@ async def dataset_examine_schema() -> str:
 
     The returned data will be a CSV where:
 
-    - the first row is header
-    - the first column is field names
-    - the second column is datatypes
+    - first row is header
+    - first column is field names
+    - second column is datatypes
     """
-    # TODO: can we return structured data?
-    return state['datasource'].dtypes.to_csv(
+    return state['dataset'].dtypes.to_csv(
         index_label = 'field_name',
         header = ['datatype'],
     )
