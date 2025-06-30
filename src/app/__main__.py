@@ -1,6 +1,8 @@
 from pathlib import Path
+from typing import Annotated
 
 from fastmcp import FastMCP
+from pydantic import Field
 import pandas as pd
 
 
@@ -34,12 +36,24 @@ mcp = FastMCP(
         - `pipeline_examine_*` tools allow client to review the current shape of pipeline and the Python code that would be produced.
         - `pipeline_evaluate_*` measures the level of anonymity that current pipeline satisfy.
           For example, it can check that data resulting fromt the pipeline satisfy which level of k-anonymity.
+
+        In current implementation, a selected dataset is essentially represented as a pandas DataFrame object on the server.
+        Client can expect operations on dataset to corresponds to some pandas operations on DataFrame in general.
     """,
 )
 
 
 @mcp.tool
-async def dataset_select_csv_file(path: str) -> bool:
+async def dataset_select_csv_file(
+    path: Annotated[
+        str,
+        Field(description = (
+            'Path inside the server to CSV file.'
+            ' This is not path inside MCP client.'
+            ' Use path given by user as-is, even if it is relative path.'
+        )),
+    ],
+) -> bool:
     """Select a CSV file as datasource to be anonymized.
 
     The server will remember the selected source in further interaction.
