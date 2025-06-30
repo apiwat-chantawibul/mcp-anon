@@ -79,6 +79,16 @@ async def dataset_examine_schema() -> str:
     )
 
 
+@mcp.tool
+async def dataset_examine_stats() -> str:
+    """Get summary statistics on the selected datasource.
+
+    This corresponds to `pandas.DataFrame.describe()`.
+    """
+    # TODO: worry about leaking sensitive data through statistics
+    return state['dataset'].describe().to_csv()
+
+
 if __name__ == '__main__':
     mcp.run()
 
