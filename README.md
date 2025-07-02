@@ -54,3 +54,10 @@ For further customization, `mcp-anon` also provide the primitive that let
 user or LLM add arbitrary Python code to the pipeline. However, LLM will be
 instructed to only use arbitrary code as a last resort.
 
+## Example integration with existing MCP clients
+
+See the corresponding documentation for each MCP client below:
+
+- [gemini-cli](integration/gemini-cli/README.md)
+- oterm (planned)
+

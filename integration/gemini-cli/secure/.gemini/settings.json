@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "anon": {
+      "command": "bash",
+      "args": [
+        "entrypoint.sh"
+      ]
+    }
+  }
+}
+
