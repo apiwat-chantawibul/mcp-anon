@@ -5,12 +5,12 @@ from fastmcp import FastMCP
 from pydantic import Field
 import pandas as pd
 
+from app.session import Session
 
-# Server state
-state = {
-    'dataset': None,
-    'pipeline': [],
-}
+
+# Server state.
+# Currently only have one session per server.
+session = Session()
 
 
 mcp = FastMCP(
@@ -56,7 +56,7 @@ async def dataset_select_csv_file(
     The server will remember the selected source in further interaction.
     """
     path = Path(path)
-    state['dataset'] = pd.read_csv(path)
+    session.dataset = pd.read_csv(path)
 
 
 @mcp.tool
@@ -69,7 +69,7 @@ async def dataset_examine_schema() -> str:
     - first column is field names
     - second column is datatypes
     """
-    return state['dataset'].dtypes.to_csv(
+    return session.dataset.dtypes.to_csv(
         index_label = 'field_name',
         header = ['datatype'],
     )
@@ -82,7 +82,7 @@ async def dataset_examine_stats() -> str:
     This corresponds to `pandas.DataFrame.describe()`.
     """
     # TODO: worry about leaking sensitive data through statistics
-    return state['dataset'].describe().to_csv()
+    return session.dataset.describe().to_csv()
 
 
 if __name__ == '__main__':
