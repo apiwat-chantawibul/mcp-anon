@@ -1,19 +1,24 @@
 from pathlib import Path
 from typing import Annotated
+from contextlib import asynccontextmanager
 
-from fastmcp import FastMCP
+from fastmcp import (
+    FastMCP,
+    Context,
+)
 from pydantic import Field
 import pandas as pd
 
-from app.session import Session
+from app.state import State
 
 
-# Server state.
-# Currently only have one session per server.
-session = Session()
+@asynccontextmanager
+async def lifespan(app: FastMCP):
+    app.state = State()
+    yield
 
 
-mcp = FastMCP(
+app = FastMCP(
     name = 'Data Anonymization Toolbox',
     instructions = """
         This MCP server helps you examine sensitive datasets and build
@@ -37,10 +42,11 @@ mcp = FastMCP(
         server, so you can generally expect dataset operations to align with
         pandas functionalities.
     """,
+    lifespan = lifespan,
 )
 
 
-@mcp.tool
+@app.tool
 async def dataset_select_csv_file(
     path: Annotated[
         str,
@@ -50,17 +56,20 @@ async def dataset_select_csv_file(
             ' Use path given by user as-is, even if it is relative path.'
         )),
     ],
+    ctx: Context,
 ) -> bool:
     """Select a CSV file as datasource to be anonymized.
 
     The server will remember the selected source in further interaction.
     """
     path = Path(path)
-    session.dataset = pd.read_csv(path)
+    ctx.fastmcp.state.session.dataset = pd.read_csv(path)
 
 
-@mcp.tool
-async def dataset_examine_schema() -> str:
+@app.tool
+async def dataset_examine_schema(
+    ctx: Context,
+) -> str:
     """Get name and datatype of each field in the selected datasource.
 
     The returned data will be a CSV where:
@@ -69,18 +78,20 @@ async def dataset_examine_schema() -> str:
     - first column is field names
     - second column is datatypes
     """
-    return session.dataset.dtypes.to_csv(
+    return ctx.fastmcp.state.session.dataset.dtypes.to_csv(
         index_label = 'field_name',
         header = ['datatype'],
     )
 
 
-@mcp.tool
-async def dataset_examine_stats() -> str:
+@app.tool
+async def dataset_examine_stats(
+    ctx: Context,
+) -> str:
     """Get summary statistics on the selected datasource.
 
     This corresponds to `pandas.DataFrame.describe()`.
     """
     # TODO: worry about leaking sensitive data through statistics
-    return session.dataset.describe().to_csv()
+    return ctx.fastmcp.state.session.dataset.describe().to_csv()
 

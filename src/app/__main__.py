@@ -1,6 +1,6 @@
-from .server import mcp
+from .server import app
 
 
 if __name__ == '__main__':
-    mcp.run()
+    app.run()
 
