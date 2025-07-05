@@ -1,0 +1,17 @@
+services:
+  oterm:
+    image: oterm
+    pull_policy: never
+    build:
+      context: .
+    environment:
+      OLLAMA_URL: http://ollama:11434
+    links:
+    - ollama
+  ollama:
+    image: ollama/ollama
+    ports:
+    - "11434:11434"
+    volumes:
+    - ./.ollama:/root/.ollama
+
