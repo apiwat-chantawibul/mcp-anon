@@ -24,6 +24,6 @@ Model name might be changed as needed.
 ## Run oterm
 
 ```bash
-docker compose run -i -t --rm oterm
+docker compose run --build -i -t --rm oterm
 ```
 

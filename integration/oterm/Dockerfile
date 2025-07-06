@@ -20,6 +20,7 @@ EOF
 
 # Switch to non-root executing user, prepare write-able workdir.
 USER $USER_UID
+COPY --chown=$USER_UID:$USER_GID config.json /home/$USERNAME/.local/share/oterm/config.json
 WORKDIR $BASE_DIR/workdir
 ENTRYPOINT ["oterm"]
 CMD []
