@@ -7,9 +7,9 @@ x-mcp-anon-common-config: &mcp-anon-common-config
     context: .
   # Mount for live editing while dev
   volumes:
-    - type: bind
-      source: ./src
-      target: /opt/app/src
+  - type: bind
+    source: ./src
+    target: /opt/app/src
 
 services:
   mcp-anon:
