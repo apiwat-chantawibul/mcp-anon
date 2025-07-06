@@ -14,10 +14,6 @@ x-mcp-anon-common-config: &mcp-anon-common-config
 services:
   mcp-anon:
     <<: *mcp-anon-common-config
-    entrypoint:
-    - python
-    - -im
-    - app
   test:
     <<: *mcp-anon-common-config
     entrypoint:
