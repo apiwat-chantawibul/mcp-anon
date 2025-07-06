@@ -15,7 +15,7 @@ While `ollama` service is running in the background, run:
 
 ```bash
 docker compose exec ollama \
-  ollama pull gemma3:1b
+  ollama pull llama3.2:3b
 ```
 
 The pulled model will persist in `.ollama` directory in working directory.

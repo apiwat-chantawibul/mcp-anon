@@ -1,4 +1,9 @@
 {
-  "splash-screen": false
+  "splash-screen": false,
+  "mcpServers": {
+    "anon": {
+      "url": "http://mcp-anon:8000/mcp/"
+    }
+  }
 }
 
