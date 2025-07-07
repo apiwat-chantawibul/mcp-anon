@@ -1,5 +1,8 @@
 name: mcp-anon-oterm
 
+include:
+- ../../docker-compose.yaml
+
 services:
   oterm:
     image: oterm
@@ -10,21 +13,15 @@ services:
       OLLAMA_URL: http://ollama:11434
     links:
     - ollama
-    - mcp-anon
+    - mcp-anon-http
+    depends_on:
+      mcp-anon-http:
+        condition: service_started
+        required: false
   ollama:
     image: ollama/ollama
     ports:
     - "11434:11434"
     volumes:
     - ./.ollama:/root/.ollama
-  mcp-anon:
-    image: mcp-anon
-    pull_policy: never
-    build:
-      context: ../..
-    command:
-    - --transport
-    - http
-    volumes:
-    - ../gemini-cli/basic/example.csv:/opt/app/workdir/example.csv
 

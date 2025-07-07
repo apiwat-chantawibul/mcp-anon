@@ -6,8 +6,7 @@
         "compose",
         "run",
         "--rm",
-        "-v",
-        "${PWD}:/opt/app/workdir",
+        "--build",
         "mcp-anon"
       ]
     }

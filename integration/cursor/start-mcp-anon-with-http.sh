@@ -1,0 +1,1 @@
+../gemini-cli/http/start-mcp-anon-with-http.sh

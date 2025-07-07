@@ -23,7 +23,10 @@ Model name might be changed as needed.
 
 ## Run oterm
 
+`http` profile is selected so `mcp-anon-http` service will also be started.
+
 ```bash
+export COMPOSE_PROFILES=http
 docker compose run --build -i -t --rm oterm
 ```
 

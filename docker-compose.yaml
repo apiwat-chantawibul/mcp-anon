@@ -1,3 +1,4 @@
+# This docker-compose.yaml is for development
 name: mcp-anon
 
 x-mcp-anon-common-config: &mcp-anon-common-config
@@ -5,15 +6,26 @@ x-mcp-anon-common-config: &mcp-anon-common-config
   pull_policy: never
   build:
     context: .
-  # Mount for live editing while dev
   volumes:
-  - type: bind
-    source: ./src
-    target: /opt/app/src
+  # Mount source code for live editing
+  - ./src:/opt/app/src
+  # Mount target of anonymization, defaulting to example
+  - ${ANON_TARGET:-./integration/example-data}:/opt/app/workdir/target
+  # Mount directory where pipeline codes will be created
+  - ${ANON_PIPELINE:-${PWD}}:/opt/app/workdir/pipeline
 
 services:
   mcp-anon:
     <<: *mcp-anon-common-config
+  mcp-anon-http:
+    <<: *mcp-anon-common-config
+    command:
+    - --transport
+    - http
+    ports:
+    - "8000:8000"
+    profiles:
+    - http
   test:
     <<: *mcp-anon-common-config
     entrypoint:
