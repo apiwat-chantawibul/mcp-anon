@@ -64,6 +64,7 @@ async def dataset_select_csv_file(
     """
     path = Path(path)
     ctx.fastmcp.state.session.dataset = pd.read_csv(path)
+    return True
 
 
 @app.tool
