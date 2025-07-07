@@ -7,7 +7,6 @@
 #   if you do not trust gemini with the data.
 
 set -eu
-HERE=$(readlink -e "$(dirname "$BASH_SOURCE")")
 
 ANON_TARGET=$(readlink -e ${ANON_TARGET:-"$PWD"})
 if [ ! -d "$ANON_TARGET" ]; then
@@ -15,7 +14,7 @@ if [ ! -d "$ANON_TARGET" ]; then
   exit 1
 fi
 
-exec docker compose -f "$HERE"/../../../docker-compose.yaml run \
+exec docker compose run \
   --rm --build \
   -v "$PWD":/opt/app/workdir/host \
   -v "$ANON_TARGET":/opt/app/workdir/target \
