@@ -18,5 +18,6 @@ exec docker compose run \
   --rm --build \
   -v "$PWD":/opt/app/workdir/host \
   -v "$ANON_TARGET":/opt/app/workdir/target \
-  mcp-anon
+  -p 8000:8000 \
+  mcp-anon --transport http
 
