@@ -29,6 +29,6 @@ ENV PYTHONPATH=$BASE_DIR/src
 # Switch to non-root executing user, prepare write-able workdir.
 USER $USER_UID
 WORKDIR $BASE_DIR/workdir
-ENTRYPOINT ["python", "-m", "app"]
+ENTRYPOINT ["fastmcp", "run", "../src/app/server.py:app"]
 CMD []
 
