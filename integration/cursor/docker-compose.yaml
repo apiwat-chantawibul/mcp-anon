@@ -1,0 +1,16 @@
+name: mcp-anon-cursor
+
+services:
+  mcp-anon:
+    image: mcp-anon
+    pull_policy: never
+    build:
+      context: ../..
+    command:
+    - --transport
+    - http
+    ports:
+    - "8000:8000"
+    volumes:
+    - ../gemini-cli/basic/example.csv:/opt/app/workdir/example.csv
+
