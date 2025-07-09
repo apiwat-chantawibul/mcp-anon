@@ -63,7 +63,7 @@ async def dataset_select_csv_file(
     The server will remember the selected source in further interaction.
     """
     path = Path(path)
-    ctx.fastmcp.state.session.dataset = pd.read_csv(path)
+    ctx.fastmcp.state.dataset = pd.read_csv(path)
     return True
 
 
@@ -79,7 +79,7 @@ async def dataset_examine_schema(
     - first column is field names
     - second column is datatypes
     """
-    return ctx.fastmcp.state.session.dataset.dtypes.to_csv(
+    return ctx.fastmcp.state.dataset.dtypes.to_csv(
         index_label = 'field_name',
         header = ['datatype'],
     )
@@ -94,5 +94,5 @@ async def dataset_examine_stats(
     This corresponds to `pandas.DataFrame.describe()`.
     """
     # TODO: worry about leaking sensitive data through statistics
-    return ctx.fastmcp.state.session.dataset.describe().to_csv()
+    return ctx.fastmcp.state.dataset.describe().to_csv()
 
