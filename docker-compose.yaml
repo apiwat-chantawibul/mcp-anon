@@ -33,7 +33,7 @@ services:
     - -m
     - pytest
     - --pyargs
-    - app
+    - tests
     profiles:
     - test
 
