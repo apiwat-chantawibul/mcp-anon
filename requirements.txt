@@ -2,3 +2,7 @@ fastmcp
 pandas
 pytest
 
+# To programmatically execute pipeline in its own kernel
+jupyter_client
+ipykernel
+
