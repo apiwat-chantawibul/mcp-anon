@@ -1,15 +1,28 @@
 from pathlib import Path
-from typing import Annotated
+from typing import Annotated, Union
 from contextlib import asynccontextmanager
 
 from fastmcp import (
     FastMCP,
     Context,
 )
-from pydantic import Field
+from pydantic import (
+    Field,
+)
 import pandas as pd
 
 from app.state import State
+from app.pipeline.pandas.load import LoadCsv
+from app.dataset.view.schema import get_dataset_schema, DatasetSchema
+from app.dataset.view.stats import get_dataset_stats, DatasetStats
+
+
+LoadConfig = Annotated[
+    Union[LoadCsv],
+    Field(
+        discriminator = 'type',
+    ),
+]
 
 
 @asynccontextmanager
@@ -23,20 +36,34 @@ app = FastMCP(
     instructions = """
         This MCP server helps you examine sensitive datasets and build
         automated pipelines to export anonymized data.
+        
+        A pipeline consist of three sequential phases --- load, tranform, and export.
 
-        Tools are named with an OBJECT_ACTION_ prefix. For example:
+        - `loader` gets data from source into working memory.
+        - `transformer` modifies data in memory.
+        - `exporter` outputs data after loading and transforming.
 
-        - `dataset_*` tools interact dataset.
-          - `dataset_select_*` choose an existing dataset on the server to work with.
-          - `dataset_examine_*` view limited, non-sensitive aspects of the
-            dataset (schemas, statistics, synthetic examples) to understand its
-            structure and content without exposing raw data. This helps you
-            plan your anonymization pipeline.
-        - `pipeline_*` tools act on anonymization pipeline being built
-          (e.g., add, edit, or delete pipeline steps).
-          - `pipeline_examine_*` review the pipeline's current configuration and generated Python code.
-          - `pipeline_evaluate_*` Assess the anonymity level
-            (e.g., k-anonymity) of the data produced by the pipeline.
+        Tools are named with an OBJECT_ACTION_ prefix.
+        Available objects are:
+
+        - `loader`, `transformer`, `exporter` are as mentioned above.
+        - `pipeline` refers all phases of pipeline together.
+        - `original` refers to dataset just after being loaded, but not yet transformed.
+        - `result` refers to dataset after all transformations.
+
+        For example,
+
+        - `original_view_*` and `result_view_*` view limited, non-sensitive
+          aspects of the dataset (schemas, statistics, synthetic examples) to
+          understand its structure and content without exposing raw data. This
+          helps you plan your anonymization pipeline.
+        - `transformer_append_binning` add a new step at the end of transformer
+          sequence which generalizes a column by binning its value.
+        - `result_evaluate_k_anonymity` Assess the k-anonymity level of resulting dataset.
+
+        # Development status
+
+        Some tools might not have been implemented yet.
 
         Currently, selected datasets are treated as pandas DataFrames on the
         server, so you can generally expect dataset operations to align with
@@ -47,52 +74,60 @@ app = FastMCP(
 
 
 @app.tool
-async def dataset_select_csv_file(
-    path: Annotated[
-        str,
-        Field(description = (
-            'Path inside the server to CSV file.'
-            ' This is not path inside MCP client.'
-            ' Use path given by user as-is, even if it is relative path.'
-        )),
-    ],
+async def loader_set(
+    load: LoadConfig,
     ctx: Context,
-) -> bool:
-    """Select a CSV file as datasource to be anonymized.
+):
+    """Specify source of data to be anonymized.
 
-    The server will remember the selected source in further interaction.
+    - The server will remember the selected source for further operations.
+    - Since the goal is to build pipeline,
+      you can use representative example of the dataset instead of raw dataset.
+    - The source need not be the actual or whole data.
+      It just need to be representative so pipeline can be designed based on its structure.
+    - Paths and URIs are resolved from server perspective, not the client's.
     """
-    path = Path(path)
-    ctx.fastmcp.state.dataset = pd.read_csv(path)
-    return True
+    pipeline = ctx.fastmcp.state.pipeline
+    if pipeline.load is not None:
+        # TODO: return previous load config when replacing.
+        raise NotImplementedError('Can not replace loader once set')
+    pipeline.load = load
+    # TODO: return source general shape
+    # TODO: return how the source is being read
 
 
 @app.tool
-async def dataset_examine_schema(
+async def loader_describe(
     ctx: Context,
-) -> str:
-    """Get name and datatype of each field in the selected datasource.
-
-    The returned data will be a CSV where:
-
-    - first row is header
-    - first column is field names
-    - second column is datatypes
-    """
-    return ctx.fastmcp.state.dataset.dtypes.to_csv(
-        index_label = 'field_name',
-        header = ['datatype'],
-    )
+) ->  LoadConfig | None:
+    """Describe current configuration of loader."""
+    return ctx.fastmcp.state.pipeline.load
 
 
 @app.tool
-async def dataset_examine_stats(
+async def original_view_schema(
     ctx: Context,
-) -> str:
-    """Get summary statistics on the selected datasource.
+) -> DatasetSchema:
+    """Get name and datatype of each field in original dataset."""
+    return get_dataset_schema(ctx.fastmcp.state.original_dataset)
+
+
+@app.tool
+async def result_view_schema(
+    ctx: Context,
+) -> DatasetSchema:
+    """Get name and datatype of each field in result dataset."""
+    return get_dataset_schema(ctx.fastmcp.state.result_dataset)
+
+
+@app.tool
+async def original_view_stats(
+    ctx: Context,
+) -> DatasetStats:
+    """Get summary statistics on original dataset.
 
     This corresponds to `pandas.DataFrame.describe()`.
     """
     # TODO: worry about leaking sensitive data through statistics
-    return ctx.fastmcp.state.dataset.describe().to_csv()
+    return get_dataset_stats(ctx.fastmcp.state.original_dataset)
 

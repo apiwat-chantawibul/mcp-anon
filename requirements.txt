@@ -1,4 +1,8 @@
 fastmcp
 pandas
+
+# dev
 pytest
+pytest-asyncio
+mypy
 

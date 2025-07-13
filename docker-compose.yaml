@@ -9,6 +9,8 @@ x-mcp-anon-common-config: &mcp-anon-common-config
   volumes:
   # Mount source code for live editing
   - ./src:/opt/app/src
+  # Mount configuration used by pytest
+  - ./pyproject.toml:/opt/app/pyproject.toml
   # Mount target of anonymization, defaulting to example
   - ${ANON_TARGET:-./integration/example-data}:/opt/app/workdir/target
   # Mount directory where pipeline codes will be created

@@ -1,25 +1,59 @@
+from pathlib import Path
+import shutil
+from functools import cached_property
+
 import pandas as pd
 from pydantic import (
     BaseModel,
     ConfigDict,
     Field,
+    computed_field,
 )
 
 from app.pipeline import Pipeline
+from app.settings import get_settings
 
 
 class State(BaseModel):
-    """Application state of mcp-anon server"""
+    """Application state of mcp-anon server.
+
+    - Keep cache of resulting dataset so pipeline does not need to be rerun on
+      every request.
+    """
 
     model_config = ConfigDict(arbitrary_types_allowed = True)
 
-    # TODO: support multi-table like xarray dataset
-    dataset: pd.DataFrame | None = Field(
-        None,
-        description = (
-            'Cache pipeline expected result.'
-            ' Should not change when pipeline is reran.'
-        ),
+    # TODO: use xarray dataset to support multi-table dataset?
+    pipeline: Pipeline[pd.DataFrame] = Pipeline()
+    workdir: Path = Field(
+        default_factory = lambda: get_settings().pipeline_dir,
+        description = 'Where pipeline is stored on mcp-anon server',
     )
-    pipeline: Pipeline | None = None
+
+    @computed_field(repr = False)
+    @cached_property
+    def original_dataset(self) -> pd.DataFrame:
+        """Dataset after it is read from source"""
+        if self.pipeline.load is None:
+            raise Exception('Dataset not available because loader is not set.')
+        return self.pipeline.load()
+
+    @computed_field(repr = False)
+    @cached_property
+    def result_dataset(self) -> pd.DataFrame:
+        """Dataset after it is transformed"""
+        return self.pipeline.transform(self.original_dataset)
+
+    def write_pipeline_code():
+        """
+        # Copy anonymization pipeline template files to working directory
+        # TODO Copy static files used by pipeline into workdir
+        # TODO handle existing files
+        shutil.copytree(
+            Path(__file__).parent / 'pipeline/template',
+            self.workdir,
+        )
+        """
+        # TODO write dynamic code to files according to self.pipeline
+        raise NotImplementedError()
 
