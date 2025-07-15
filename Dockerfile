@@ -26,9 +26,12 @@ WORKDIR $BASE_DIR/src
 COPY src ./
 ENV PYTHONPATH=$BASE_DIR/src
 
-# Switch to non-root executing user, prepare write-able workdir.
-USER $USER_UID
+# Prepare universally accessible workdir.
 WORKDIR $BASE_DIR/workdir
+RUN chmod 777 .
+
+# Switch to non-root executing user
+USER $USER_UID
 ENV FASTMCP_HOST=0.0.0.0
 ENTRYPOINT ["fastmcp", "run", "../src/app/server.py:app"]
 CMD []
