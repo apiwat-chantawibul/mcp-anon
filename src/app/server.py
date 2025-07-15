@@ -124,10 +124,15 @@ async def result_view_schema(
 async def original_view_stats(
     ctx: Context,
 ) -> DatasetStats:
-    """Get summary statistics on original dataset.
-
-    This corresponds to `pandas.DataFrame.describe()`.
-    """
+    """Get summary statistics on original dataset."""
     # TODO: worry about leaking sensitive data through statistics
     return get_dataset_stats(ctx.fastmcp.state.original_dataset)
+
+
+@app.tool
+async def result_view_stats(
+    ctx: Context,
+) -> DatasetStats:
+    """Get summary statistics on result dataset."""
+    return get_dataset_stats(ctx.fastmcp.state.result_dataset)
 

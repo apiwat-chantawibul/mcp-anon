@@ -6,6 +6,7 @@ class FieldStats(RootModel[dict[str, float]]):
     """List statistics for a particular field.
 
     Maps from statistics name to its value.
+    Stats name corresponds those produced by `pandas.DataFrame.describe()`.
     """
     pass
 
