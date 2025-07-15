@@ -10,7 +10,7 @@ from pydantic import (
     computed_field,
 )
 
-from app.pipeline import Pipeline
+from app.pipeline import Pipeline, Transform
 from app.settings import get_settings
 
 
@@ -43,6 +43,14 @@ class State(BaseModel):
     def result_dataset(self) -> pd.DataFrame:
         """Dataset after it is transformed"""
         return self.pipeline.transform(self.original_dataset)
+
+    def append_transform(self, transform: Transform) -> None:
+        transform_sequence = self.pipeline.transform.sequence
+        transform_sequence.append(transform)
+        # TODO: do not clear, compute from current result
+        # This might requires custom @property
+        if hasattr(self, 'result_dataset'):
+            del self.result_dataset
 
     def write_pipeline_code():
         """

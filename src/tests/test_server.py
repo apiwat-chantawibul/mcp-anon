@@ -1,4 +1,5 @@
 from pathlib import Path
+import inspect
 
 import pytest
 from fastmcp import FastMCP, Client
@@ -84,4 +85,41 @@ async def test_original_view_stats(input_load_config):
         })
         results['original_stats'] = await client.call_tool('original_view_stats')
         assert results['original_stats'].structured_content == expected_stats
+
+
+async def test_custom_transform(input_load_config):
+    # TODO check why this code is called twice
+    code = inspect.cleandoc("""
+        def remove_salary_and_reset_id(df):
+            df = df.drop(columns = 'salary')
+            df['id'] = df.index
+            return df
+    """)
+    expected_stats = {
+        'id': {'25%': 0.25,
+               '50%': 0.5,
+               '75%': 0.75,
+               'count': 2.0,
+               'max': 1.0,
+               'mean': 0.5,
+               'min': 0.0,
+               'std': 0.7071067811865476},
+        'married': {'25%': 0.25,
+                    '50%': 0.5,
+                    '75%': 0.75,
+                    'count': 2.0,
+                    'max': 1.0,
+                    'mean': 0.5,
+                    'min': 0.0,
+                    'std': 0.7071067811865476}}
+    results = {}
+    async with Client(app) as client:
+        results['set'] = await client.call_tool('loader_set', {
+            'load': input_load_config
+        })
+        results['append'] = await client.call_tool('transformer_append_custom', {
+            'custom_transform': {'function_definition': code}
+        })
+        results['stats'] = await client.call_tool('result_view_stats')
+        assert results['stats'].structured_content == expected_stats
 

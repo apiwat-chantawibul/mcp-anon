@@ -12,6 +12,7 @@ from pydantic import (
 import pandas as pd
 
 from app.state import State
+from app.pipeline import CustomTransform
 from app.pipeline.pandas.load import LoadCsv
 from app.dataset.view.schema import get_dataset_schema, DatasetSchema
 from app.dataset.view.stats import get_dataset_stats, DatasetStats
@@ -135,4 +136,18 @@ async def result_view_stats(
 ) -> DatasetStats:
     """Get summary statistics on result dataset."""
     return get_dataset_stats(ctx.fastmcp.state.result_dataset)
+
+
+# TODO: return tranformation ID
+# - so it can be referenced when deleting
+# - ID format should be semantic.
+# TODO: maybe allow adding tranform at different places in transformer
+# but defaulting to at the end?
+@app.tool
+async def transformer_append_custom(
+    custom_transform: CustomTransform[pd.DataFrame],
+    ctx: Context,
+) -> None:
+    """Append a new step at the end of transformer sequencec that perform an custom dataset transformation according to custom code."""
+    ctx.fastmcp.state.append_transform(custom_transform)
 
