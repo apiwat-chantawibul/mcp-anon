@@ -39,7 +39,7 @@ class State(BaseModel):
     @cached_property
     def result_dataset(self) -> pd.DataFrame:
         """Dataset after it is transformed"""
-        return self.pipeline.transform(self.original_dataset)
+        return self.pipeline.transform(self.original_dataset.copy())
 
     def append_transform(self, transform: Transform) -> None:
         transform_sequence = self.pipeline.transform.sequence
