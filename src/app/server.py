@@ -90,7 +90,7 @@ app = FastMCP(
 async def loader_set(
     loader_config: LoaderConfig,
     ctx: Context,
-):
+) -> DatasetSchema:
     """Specify source of data to be anonymized.
 
     - The server will remember the selected source for further operations.
@@ -99,14 +99,15 @@ async def loader_set(
     - The source need not be the actual or whole data.
       It just need to be representative so pipeline can be designed based on its structure.
     - Paths and URIs are resolved from server perspective, not the client's.
+
+    On success, immediately return result from original_dataset_schema tool.
     """
     pipeline = ctx.fastmcp.state.pipeline
     if pipeline.load is not None:
         # TODO: return previous load config when replacing.
         raise NotImplementedError('Can not replace loader once set')
     pipeline.load = loader_config
-    # TODO: return source general shape
-    # TODO: return how the source is being read
+    return await original_view_schema.fn(ctx)
 
 
 @app.tool

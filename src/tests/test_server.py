@@ -27,7 +27,6 @@ async def test_load_and_describe(input_load_config):
     results = {}
     async with Client(app) as client:
         results['set'] = await client.call_tool('loader_set', input_load_config)
-        assert results['set'].data is None
         results['describe'] = await client.call_tool('loader_describe')
         reflected_load_config = results['describe'].data
         assert input_load_config['loader_config'] == reflected_load_config
@@ -43,6 +42,7 @@ async def test_original_view_schema(input_load_config):
     results = {}
     async with Client(app) as client:
         results['set'] = await client.call_tool('loader_set', input_load_config)
+        assert results['set'].structured_content == expected_schema
         results['original_schema'] = await client.call_tool('original_view_schema')
         assert results['original_schema'].structured_content == expected_schema
         results['result_schema'] = await client.call_tool('result_view_schema')
