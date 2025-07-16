@@ -15,35 +15,27 @@ from pydantic import (
 import pandas as pd
 
 from app.state import State
-from app.pipeline import CustomTransform, Load
+from app.pipeline import CustomTransform
 from app.pipeline.pandas.load import LoadCsv, LoadSql
 from app.dataset.view.schema import get_dataset_schema, DatasetSchema
 from app.dataset.view.stats import get_dataset_stats, DatasetStats
 
 
-class LoaderConfig(BaseModel):
-    """Configuration for dataset loader.
-
-    Each key corresponds to different type of loader.
-    Only exactly one key can be set at a time.
-    """
-    csv: LoadCsv | None = None
-    sql: LoadSql | None = None
-
-    @model_validator(mode = 'after')
-    def validate_exactly_one_subtype(self) -> 'LoaderConfig':
-        selected = list(filter(None, (getattr(self, attr) for attr in self.model_fields_set)))
-        if len(selected) != 1:
-            raise ValueError('Exactly one key of LoaderConfig must be non-empty.')
-        return self
-
-    def get_selected_subtype(self):
-        type_name = next(iter(self.model_fields_set))
-        return getattr(self, type_name)
-
-    @classmethod
-    def from_subtype(cls, subtype: Load[pd.DataFrame]) -> 'LoaderConfig':
-        return cls(**{subtype.type: subtype})
+LoaderConfig = Annotated[
+    Union[LoadCsv, LoadSql],
+    Field(
+        discriminator = 'type',
+        description = 'Configuration for dataset loader',
+        examples = [
+            {'type': 'csv',
+             'path': 'input.csv'},
+            {'type': 'sql',
+             'sql': 'SELECT * FROM table',
+             'drivername': 'mysql',
+             'host': 'localhost'},
+        ],
+    ),
+]
 
 
 @asynccontextmanager
@@ -112,8 +104,7 @@ async def loader_set(
     if pipeline.load is not None:
         # TODO: return previous load config when replacing.
         raise NotImplementedError('Can not replace loader once set')
-    selected = loader_config.get_selected_subtype()
-    pipeline.load = selected
+    pipeline.load = loader_config
     # TODO: return source general shape
     # TODO: return how the source is being read
 
@@ -126,7 +117,7 @@ async def loader_describe(
     load = ctx.fastmcp.state.pipeline.load
     if load is None:
         return None
-    return LoaderConfig.from_subtype(load)
+    return load
 
 
 @app.tool

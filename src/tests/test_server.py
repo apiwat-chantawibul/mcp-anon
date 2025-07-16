@@ -16,12 +16,10 @@ async def test_describe_initial():
 @pytest.fixture(scope = 'module')
 def input_load_config():
     return {
-        'loader_config': LoaderConfig(**{
-            'csv': {
-                'type': 'csv',
-                'path': Path(__file__).parent / 'datasets/small.csv',
-            },
-        }),
+        'loader_config': {
+            'type': 'csv',
+            'path': str(Path(__file__).parent / 'datasets/small.csv'),
+        },
     }
 
 
@@ -31,7 +29,7 @@ async def test_load_and_describe(input_load_config):
         results['set'] = await client.call_tool('loader_set', input_load_config)
         assert results['set'].data is None
         results['describe'] = await client.call_tool('loader_describe')
-        reflected_load_config = LoaderConfig(**results['describe'].data)
+        reflected_load_config = results['describe'].data
         assert input_load_config['loader_config'] == reflected_load_config
 
 
