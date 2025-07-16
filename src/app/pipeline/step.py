@@ -4,13 +4,11 @@ import inspect
 
 from pydantic import (
     BaseModel,
-    computed_field,
 )
 
 class Step[Dataset](BaseModel, Callable, ABC):
     """Step in pipeline"""
 
-    @computed_field(repr = False)
     @property
     def get_source_code(self) -> str:
         # TODO: check if this source code is in a form that

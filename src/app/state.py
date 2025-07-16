@@ -7,7 +7,6 @@ from pydantic import (
     BaseModel,
     ConfigDict,
     Field,
-    computed_field,
 )
 
 from app.pipeline import Pipeline, Transform
@@ -30,7 +29,6 @@ class State(BaseModel):
         description = 'Where pipeline is stored on mcp-anon server',
     )
 
-    @computed_field(repr = False)
     @cached_property
     def original_dataset(self) -> pd.DataFrame:
         """Dataset after it is read from source"""
@@ -38,7 +36,6 @@ class State(BaseModel):
             raise Exception('Dataset not available because loader is not set.')
         return self.pipeline.load()
 
-    @computed_field(repr = False)
     @cached_property
     def result_dataset(self) -> pd.DataFrame:
         """Dataset after it is transformed"""
