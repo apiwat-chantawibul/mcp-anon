@@ -4,8 +4,7 @@ import inspect
 import pytest
 from fastmcp import FastMCP, Client
 
-from app.server import app
-from app.pipeline.pandas.load import LoadCsv
+from app.server import app, LoaderConfig
 
 
 async def test_describe_initial():
@@ -16,22 +15,24 @@ async def test_describe_initial():
 
 @pytest.fixture(scope = 'module')
 def input_load_config():
-    return LoadCsv(
-        type = 'csv',
-        path = Path(__file__).parent / 'datasets/small.csv',
-    )
+    return {
+        'loader_config': LoaderConfig(**{
+            'csv': {
+                'type': 'csv',
+                'path': Path(__file__).parent / 'datasets/small.csv',
+            },
+        }),
+    }
 
 
 async def test_load_and_describe(input_load_config):
     results = {}
     async with Client(app) as client:
-        results['set'] = await client.call_tool('loader_set', {
-            'load': input_load_config
-        })
+        results['set'] = await client.call_tool('loader_set', input_load_config)
         assert results['set'].data is None
         results['describe'] = await client.call_tool('loader_describe')
-        reflected_load_config = LoadCsv(**results['describe'].data)
-        assert input_load_config == reflected_load_config
+        reflected_load_config = LoaderConfig(**results['describe'].data)
+        assert input_load_config['loader_config'] == reflected_load_config
 
 
 async def test_original_view_schema(input_load_config):
@@ -43,9 +44,7 @@ async def test_original_view_schema(input_load_config):
     ]}
     results = {}
     async with Client(app) as client:
-        results['set'] = await client.call_tool('loader_set', {
-            'load': input_load_config
-        })
+        results['set'] = await client.call_tool('loader_set', input_load_config)
         results['original_schema'] = await client.call_tool('original_view_schema')
         assert results['original_schema'].structured_content == expected_schema
         results['result_schema'] = await client.call_tool('result_view_schema')
@@ -80,9 +79,7 @@ async def test_original_view_stats(input_load_config):
                    'std': 10606.601717798212}}
     results = {}
     async with Client(app) as client:
-        results['set'] = await client.call_tool('loader_set', {
-            'load': input_load_config
-        })
+        results['set'] = await client.call_tool('loader_set', input_load_config)
         results['original_stats'] = await client.call_tool('original_view_stats')
         assert results['original_stats'].structured_content == expected_stats
 
@@ -114,9 +111,7 @@ async def test_custom_transform(input_load_config):
                     'std': 0.7071067811865476}}
     results = {}
     async with Client(app) as client:
-        results['set'] = await client.call_tool('loader_set', {
-            'load': input_load_config
-        })
+        results['set'] = await client.call_tool('loader_set', input_load_config)
         results['append'] = await client.call_tool('transformer_append_custom', {
             'custom_transform': {'function_definition': code}
         })

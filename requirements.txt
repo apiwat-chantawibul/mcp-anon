@@ -1,6 +1,10 @@
 fastmcp
 pandas
 
+# Optional
+# TODO: follow https://github.com/pandas-dev/pandas/blob/main/pyproject.toml
+SQLAlchemy>=2.0.0
+
 # dev
 pytest
 pytest-asyncio

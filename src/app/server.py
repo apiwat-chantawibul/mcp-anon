@@ -1,29 +1,49 @@
 from pathlib import Path
 from typing import Annotated, Union
 from contextlib import asynccontextmanager
+import inspect
 
 from fastmcp import (
     FastMCP,
     Context,
 )
 from pydantic import (
+    BaseModel,
     Field,
+    model_validator,
 )
 import pandas as pd
 
 from app.state import State
-from app.pipeline import CustomTransform
-from app.pipeline.pandas.load import LoadCsv
+from app.pipeline import CustomTransform, Load
+from app.pipeline.pandas.load import LoadCsv, LoadSql
 from app.dataset.view.schema import get_dataset_schema, DatasetSchema
 from app.dataset.view.stats import get_dataset_stats, DatasetStats
 
 
-LoadConfig = Annotated[
-    Union[LoadCsv],
-    Field(
-        discriminator = 'type',
-    ),
-]
+class LoaderConfig(BaseModel):
+    """Configuration for dataset loader.
+
+    Each key corresponds to different type of loader.
+    Only exactly one key can be set at a time.
+    """
+    csv: LoadCsv | None = None
+    sql: LoadSql | None = None
+
+    @model_validator(mode = 'after')
+    def validate_exactly_one_subtype(self) -> 'LoaderConfig':
+        selected = list(filter(None, (getattr(self, attr) for attr in self.model_fields_set)))
+        if len(selected) != 1:
+            raise ValueError('Exactly one key of LoaderConfig must be non-empty.')
+        return self
+
+    def get_selected_subtype(self):
+        type_name = next(iter(self.model_fields_set))
+        return getattr(self, type_name)
+
+    @classmethod
+    def from_subtype(cls, subtype: Load[pd.DataFrame]) -> 'LoaderConfig':
+        return cls(**{subtype.type: subtype})
 
 
 @asynccontextmanager
@@ -76,7 +96,7 @@ app = FastMCP(
 
 @app.tool
 async def loader_set(
-    load: LoadConfig,
+    loader_config: LoaderConfig,
     ctx: Context,
 ):
     """Specify source of data to be anonymized.
@@ -92,7 +112,8 @@ async def loader_set(
     if pipeline.load is not None:
         # TODO: return previous load config when replacing.
         raise NotImplementedError('Can not replace loader once set')
-    pipeline.load = load
+    selected = loader_config.get_selected_subtype()
+    pipeline.load = selected
     # TODO: return source general shape
     # TODO: return how the source is being read
 
@@ -100,9 +121,12 @@ async def loader_set(
 @app.tool
 async def loader_describe(
     ctx: Context,
-) ->  LoadConfig | None:
+) ->  LoaderConfig | None:
     """Describe current configuration of loader."""
-    return ctx.fastmcp.state.pipeline.load
+    load = ctx.fastmcp.state.pipeline.load
+    if load is None:
+        return None
+    return LoaderConfig.from_subtype(load)
 
 
 @app.tool
