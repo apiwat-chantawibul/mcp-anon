@@ -154,16 +154,27 @@ async def result_view_stats(
     return get_dataset_stats(ctx.fastmcp.state.result_dataset)
 
 
+TransformerConfig = Annotated[
+    Union[
+        CustomTransform[pd.DataFrame],
+    ],
+    Field(
+        discriminator = 'type',
+        description = 'Configuration for a transformation step',
+    ),
+]
+
+
 # TODO: return tranformation ID
 # - so it can be referenced when deleting
 # - ID format should be semantic.
 # TODO: maybe allow adding tranform at different places in transformer
 # but defaulting to at the end?
 @app.tool
-async def transformer_append_custom(
-    custom_transform: CustomTransform[pd.DataFrame],
+async def transformer_append(
+    transform: TransformerConfig,
     ctx: Context,
 ) -> None:
-    """Append a new step at the end of transformer sequencec that perform an custom dataset transformation according to custom code."""
-    ctx.fastmcp.state.append_transform(custom_transform)
+    """Append a new step at the end of transformer sequence"""
+    ctx.fastmcp.state.append_transform(transform)
 

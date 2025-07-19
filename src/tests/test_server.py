@@ -110,8 +110,11 @@ async def test_custom_transform(input_load_config):
     results = {}
     async with Client(app) as client:
         results['set'] = await client.call_tool('loader_set', input_load_config)
-        results['append'] = await client.call_tool('transformer_append_custom', {
-            'custom_transform': {'function_definition': code}
+        results['append'] = await client.call_tool('transformer_append', {
+            'transform': {
+                'type': 'custom',
+                'function_definition': code,
+            }
         })
         results['stats'] = await client.call_tool('result_view_stats')
         assert results['stats'].structured_content == expected_stats

@@ -1,6 +1,6 @@
 from __future__ import annotations
 import ast
-from typing import Callable
+from typing import Callable, Literal
 import inspect
 
 from pydantic import (
@@ -15,6 +15,7 @@ from .step import Transform
 class CustomTransform[Dataset](Transform[Dataset]):
     """Transformation dataset defined by arbitrary python code."""
 
+    type: Literal['custom']
     function_definition: str = Field(
         description = inspect.cleandoc("""
             Must take a dataset and return the transformed dataset.
