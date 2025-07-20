@@ -4,3 +4,6 @@
 # Temporary files
 **/.*.swp
 
+# Python temporary files
+**/__pycache__
+
