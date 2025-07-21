@@ -8,7 +8,7 @@ from ..step import Export
 
 
 class ExportCsv(Export[pd.DataFrame]):
-    type: Literal['csv']
+    type: Literal['csv'] = 'csv'
     path: FilePath
 
     def __call__(self, pd.DataFrame) -> None:

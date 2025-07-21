@@ -13,7 +13,7 @@ async def test_describe_initial():
         assert result.data is None
 
 
-@pytest.fixture(scope = 'module')
+@pytest.fixture
 def input_load_config():
     return {
         'loader_config': {
@@ -30,6 +30,13 @@ async def test_load_and_describe(input_load_config):
         results['describe'] = await client.call_tool('loader_describe')
         reflected_load_config = results['describe'].data
         assert input_load_config['loader_config'] == reflected_load_config
+
+
+async def test_missing_load_type(input_load_config):
+    del input_load_config['loader_config']['type']
+    async with Client(app) as client:
+        with pytest.raises(Exception):
+            result = await client.call_tool('loader_set', input_load_config)
 
 
 async def test_original_view_schema(input_load_config):

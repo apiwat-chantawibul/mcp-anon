@@ -13,7 +13,7 @@ from ..step import Load
 
 class LoadCsv(Load[pd.DataFrame]):
     """Load data from CSV file"""
-    type: Literal['csv']
+    type: Literal['csv'] = 'csv'
     path: FilePath
 
     def __call__(self) -> pd.DataFrame:
@@ -25,7 +25,7 @@ class LoadSql(Load[pd.DataFrame]):
 
     Connection parameters as defined by sqlalchemy.engine.URL.create()
     """
-    type: Literal['sql']
+    type: Literal['sql'] = 'sql'
     sql: str = Field(
         examples = ['SELECT * FROM table'],
     )
