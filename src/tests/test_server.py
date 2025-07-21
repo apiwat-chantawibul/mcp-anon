@@ -118,4 +118,14 @@ async def test_custom_transform(input_load_config):
         })
         results['stats'] = await client.call_tool('result_view_stats')
         assert results['stats'].structured_content == expected_stats
+        results['view'] = await client.call_tool('transformer_view')
+        assert results['view'].structured_content == {
+            'type': 'sequence',
+            'sequence': [
+                {
+                    'function_definition': code,
+                    'type': 'custom',
+                },
+            ],
+        }
 

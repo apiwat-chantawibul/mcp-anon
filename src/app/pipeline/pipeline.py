@@ -1,5 +1,6 @@
 from pydantic import (
     BaseModel,
+    SerializeAsAny,
 )
 
 from .step import (
@@ -14,6 +15,6 @@ class Pipeline[Dataset](BaseModel):
     """Pipeline for loading, transforming, and exporting dataset"""
 
     load: Load[Dataset] | None = None
-    transform: Transform[Dataset] = TransformSequence()
+    transform: SerializeAsAny[Transform[Dataset]] = TransformSequence()
     export: Export[Dataset] | None = None
 

@@ -15,7 +15,7 @@ from pydantic import (
 import pandas as pd
 
 from app.state import State
-from app.pipeline import CustomTransform
+from app.pipeline import CustomTransform, TransformSequence
 from app.pipeline.pandas.load import LoadCsv, LoadSql
 from app.dataset.view.schema import get_dataset_schema, DatasetSchema
 from app.dataset.view.stats import get_dataset_stats, DatasetStats
@@ -177,4 +177,14 @@ async def transformer_append(
 ) -> None:
     """Append a new step at the end of transformer sequence"""
     ctx.fastmcp.state.append_transform(transform)
+
+
+# TODO: Optionally specify ID to selectively view part of transformer
+# TODO: Optionally show source code implementation
+@app.tool
+async def transformer_view(
+    ctx: Context,
+) -> TransformSequence:
+    """Get full definition of current transformer sequence"""
+    return ctx.fastmcp.state.pipeline.transform
 
