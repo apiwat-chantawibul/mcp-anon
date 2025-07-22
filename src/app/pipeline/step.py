@@ -5,12 +5,20 @@ import inspect
 
 from pydantic import (
     BaseModel,
+    Field,
     SerializeAsAny,
 )
 
 
 class Step[Dataset](BaseModel, Callable, ABC):
     """Step in pipeline"""
+
+    type: str = Field(
+        description = (
+            'Discriminator between different step types.'
+            ' Only unique within its own load/tranform/export category.'
+        ),
+    )
 
     @property
     def get_source_code(self) -> str:
