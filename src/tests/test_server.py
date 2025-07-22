@@ -90,7 +90,6 @@ async def test_original_view_stats(input_load_config):
 
 
 async def test_custom_transform(input_load_config):
-    # TODO check why this code is called twice
     code = inspect.cleandoc("""
         def remove_salary_and_reset_id(df):
             df = df.drop(columns = 'salary')
@@ -135,4 +134,29 @@ async def test_custom_transform(input_load_config):
                 },
             ],
         }
+
+
+async def test_bin_transform(input_load_config):
+    expected_schema = {'fields': [
+        {'name': 'id', 'datatype': 'int64'},
+        {'name': 'name', 'datatype': 'object'},
+        {'name': 'salary', 'datatype': 'category'},
+        {'name': 'married', 'datatype': 'int64'},
+    ]}
+    results = {}
+    async with Client(app) as client:
+        results['set'] = await client.call_tool('loader_set', input_load_config)
+        results['append'] = await client.call_tool('transformer_append', {
+            'transform': {
+                'type': 'bin',
+                'input_field': 'salary',
+                'bins': [0, 10000, 20000, 30000],
+            }
+        })
+        results['result_schema'] = await client.call_tool('result_view_schema')
+        assert results['result_schema'].structured_content == expected_schema
+        # TODO: This test is dictating implementation too much.
+        # However, we are missing a way to confirm change without direct app.state access.
+        interval = app.state.result_dataset.salary[0]
+        assert (interval.left, interval.right) == (20000, 30000)
 

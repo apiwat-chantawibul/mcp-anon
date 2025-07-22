@@ -13,7 +13,11 @@ from .step import Transform
 
 
 class CustomTransform[Dataset](Transform[Dataset]):
-    """Transformation dataset defined by arbitrary python code."""
+    """Transformation of dataset defined by arbitrary python code.
+
+    Should only be used as a last resort when the desired pipeline could not be
+    created using other specialized transform.
+    """
 
     type: Literal['custom'] = 'custom'
     function_definition: str = Field(

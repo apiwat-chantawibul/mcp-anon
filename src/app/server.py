@@ -16,7 +16,7 @@ import pandas as pd
 
 from app.state import State
 from app.pipeline import CustomTransform, TransformSequence
-from app.pipeline.pandas.load import LoadCsv, LoadSql
+from app.pipeline.pandas import LoadCsv, LoadSql, BinTransform
 from app.dataset.view.schema import get_dataset_schema, DatasetSchema
 from app.dataset.view.stats import get_dataset_stats, DatasetStats
 
@@ -156,6 +156,7 @@ async def result_view_stats(
 
 TransformerConfig = Annotated[
     Union[
+        BinTransform,
         CustomTransform[pd.DataFrame],
     ],
     Field(
