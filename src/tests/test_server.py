@@ -160,3 +160,36 @@ async def test_bin_transform(input_load_config):
         interval = app.state.result_dataset.salary[0]
         assert (interval.left, interval.right) == (20000, 30000)
 
+
+async def test_drop_transform(input_load_config):
+    expected_schema = {'fields': [
+        {'name': 'salary', 'datatype': 'int64'},
+        {'name': 'married', 'datatype': 'int64'},
+    ]}
+    results = {}
+    async with Client(app) as client:
+        results['set'] = await client.call_tool('loader_set', input_load_config)
+        results['append'] = await client.call_tool('transformer_append', {
+            'transform': {
+                'type': 'drop',
+                'fields': ['id', 'name'],
+            }
+        })
+        results['result_schema'] = await client.call_tool('result_view_schema')
+        assert results['result_schema'].structured_content == expected_schema
+
+
+async def test_drop_non_existent_field(input_load_config):
+    results = {}
+    async with Client(app) as client:
+        results['set'] = await client.call_tool('loader_set', input_load_config)
+        results['append'] = await client.call_tool('transformer_append', {
+            'transform': {
+                'type': 'drop',
+                'fields': 'non_existent',
+            }
+        })
+        # Error is only detected when result_dataset is accessed
+        with pytest.raises(Exception, match = 'non_existent'):
+            app.state.result_dataset
+
