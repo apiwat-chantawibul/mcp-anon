@@ -41,10 +41,10 @@ async def test_missing_load_type(input_load_config):
 
 async def test_original_view_schema(input_load_config):
     expected_schema = {'fields': [
-        {'name': 'id', 'datatype': 'int64'},
-        {'name': 'name', 'datatype': 'object'},
-        {'name': 'salary', 'datatype': 'int64'},
-        {'name': 'married', 'datatype': 'int64'},
+        {'name': 'id', 'datatype': 'int64[pyarrow]'},
+        {'name': 'name', 'datatype': 'string[pyarrow]'},
+        {'name': 'salary', 'datatype': 'int64[pyarrow]'},
+        {'name': 'married', 'datatype': 'int64[pyarrow]'},
     ]}
     results = {}
     async with Client(app) as client:
@@ -138,10 +138,10 @@ async def test_custom_transform(input_load_config):
 
 async def test_bin_transform(input_load_config):
     expected_schema = {'fields': [
-        {'name': 'id', 'datatype': 'int64'},
-        {'name': 'name', 'datatype': 'object'},
+        {'name': 'id', 'datatype': 'int64[pyarrow]'},
+        {'name': 'name', 'datatype': 'string[pyarrow]'},
         {'name': 'salary', 'datatype': 'category'},
-        {'name': 'married', 'datatype': 'int64'},
+        {'name': 'married', 'datatype': 'int64[pyarrow]'},
     ]}
     results = {}
     async with Client(app) as client:
@@ -163,8 +163,8 @@ async def test_bin_transform(input_load_config):
 
 async def test_drop_transform(input_load_config):
     expected_schema = {'fields': [
-        {'name': 'salary', 'datatype': 'int64'},
-        {'name': 'married', 'datatype': 'int64'},
+        {'name': 'salary', 'datatype': 'int64[pyarrow]'},
+        {'name': 'married', 'datatype': 'int64[pyarrow]'},
     ]}
     results = {}
     async with Client(app) as client:

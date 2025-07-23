@@ -17,7 +17,10 @@ class LoadCsv(Load[pd.DataFrame]):
     path: FilePath
 
     def __call__(self) -> pd.DataFrame:
-        return pd.read_csv(self.path)
+        return pd.read_csv(
+            self.path,
+            dtype_backend = 'pyarrow',
+        )
 
 
 class LoadSql(Load[pd.DataFrame]):
@@ -58,5 +61,6 @@ class LoadSql(Load[pd.DataFrame]):
             df = pd.read_sql(
                 sql,
                 connection,
+                dtype_backend = 'pyarrow',
             )
 

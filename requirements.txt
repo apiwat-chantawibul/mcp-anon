@@ -1,11 +1,11 @@
+### Core ###
 fastmcp
-pandas
+pandas[performance, sql-other]
 
-# Optional
-# TODO: follow https://github.com/pandas-dev/pandas/blob/main/pyproject.toml
-SQLAlchemy>=2.0.0
+# For saner datatype reporting
+pyarrow
 
-# dev
+### Dev ###
 pytest
 pytest-asyncio
 mypy

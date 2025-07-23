@@ -12,7 +12,6 @@ class DatasetSchema(BaseModel):
 
 
 def get_dataset_schema(df: pd.DataFrame) -> DatasetSchema:
-    # TODO report type as string instead of object when possible
     # TODO try pyarrow dtype
     return DatasetSchema(
         fields = [
