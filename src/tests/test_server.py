@@ -183,13 +183,11 @@ async def test_drop_non_existent_field(input_load_config):
     results = {}
     async with Client(app) as client:
         results['set'] = await client.call_tool('loader_set', input_load_config)
-        results['append'] = await client.call_tool('transformer_append', {
-            'transform': {
-                'type': 'drop',
-                'fields': 'non_existent',
-            }
-        })
-        # Error is only detected when result_dataset is accessed
         with pytest.raises(Exception, match = 'non_existent'):
-            app.state.result_dataset
+            results['append'] = await client.call_tool('transformer_append', {
+                'transform': {
+                    'type': 'drop',
+                    'fields': 'non_existent',
+                }
+            })
 

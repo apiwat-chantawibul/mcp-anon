@@ -42,12 +42,27 @@ class State(BaseModel):
         return self.pipeline.transform(self.original_dataset.copy())
 
     def append_transform(self, transform: Transform) -> None:
+        """Append new transformation step and update app state.
+
+        - Result_dataset will be updated immediately to ensure feedback on
+          appending faulty transform.
+        - New transform is only appended if it does not cause error.
+        - All previous transforms must have already been tested.
+          Otherwise, we will not know if error in the pipeline is caused by new
+          transform or previously untested steps.
+        """
         transform_sequence = self.pipeline.transform.sequence
-        transform_sequence.append(transform)
-        # TODO: do not clear, compute from current result
-        # This might requires custom @property
+
         if 'result_dataset' in self.__dict__:
-            del self.result_dataset
+            self.result_dataset = transform(self.result_dataset)
+            transform_sequence.append(transform)
+        else:
+            transform_sequence.append(transform)
+            try:
+                _ = self.result_dataset
+            except Exception as e:
+                transform_sequence.pop()
+                raise e
 
     def write_pipeline_code():
         """

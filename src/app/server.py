@@ -177,7 +177,12 @@ async def transformer_append(
     transform: TransformerConfig,
     ctx: Context,
 ) -> None:
-    """Append a new step at the end of transformer sequence"""
+    """Append a new step at the end of transformer sequence.
+
+    - The transform will be immediately tested against dataset.
+    - If the transform causes error, it will not be appended to sequence.
+    - On success, return null.
+    """
     ctx.fastmcp.state.append_transform(transform)
 
 
