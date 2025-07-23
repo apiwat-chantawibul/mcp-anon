@@ -46,7 +46,7 @@ class State(BaseModel):
         transform_sequence.append(transform)
         # TODO: do not clear, compute from current result
         # This might requires custom @property
-        if hasattr(self, 'result_dataset'):
+        if 'result_dataset' in self.__dict__:
             del self.result_dataset
 
     def write_pipeline_code():
