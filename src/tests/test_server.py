@@ -140,7 +140,7 @@ async def test_bin_transform(input_load_config):
     expected_schema = {'fields': [
         {'name': 'id', 'datatype': 'int64[pyarrow]'},
         {'name': 'name', 'datatype': 'string[pyarrow]'},
-        {'name': 'salary', 'datatype': 'category'},
+        {'name': 'salary', 'datatype': 'CategoricalDtype(categories=[(0, 10000], (10000, 20000], (20000, 30000]], ordered=True, categories_dtype=interval[int64, right])'},
         {'name': 'married', 'datatype': 'int64[pyarrow]'},
     ]}
     results = {}

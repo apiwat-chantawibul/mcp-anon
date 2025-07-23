@@ -12,12 +12,11 @@ class DatasetSchema(BaseModel):
 
 
 def get_dataset_schema(df: pd.DataFrame) -> DatasetSchema:
-    # TODO try pyarrow dtype
     return DatasetSchema(
         fields = [
             {
                 'name': col,
-                'datatype': str(df[col].dtype),
+                'datatype': repr(df[col].dtype),
             }
             for col in df
         ],
