@@ -21,23 +21,6 @@ from app.dataset.view.schema import get_dataset_schema, DatasetSchema
 from app.dataset.view.stats import get_dataset_stats, DatasetStats
 
 
-LoaderConfig = Annotated[
-    Union[LoadCsv, LoadSql],
-    Field(
-        discriminator = 'type',
-        description = 'Configuration for dataset loader',
-        examples = [
-            {'type': 'csv',
-             'path': 'input.csv'},
-            {'type': 'sql',
-             'sql': 'SELECT * FROM table',
-             'drivername': 'mysql',
-             'host': 'localhost'},
-        ],
-    ),
-]
-
-
 @asynccontextmanager
 async def lifespan(app: FastMCP):
     app.state = State()
@@ -48,7 +31,7 @@ app = FastMCP(
     name = 'Data Anonymization Toolbox',
     instructions = """
         This MCP server helps you examine sensitive datasets and build
-        automated pipelines to export anonymized data.
+        automated pipeline to export anonymized data.
         
         A pipeline consist of three sequential phases --- load, tranform, and export.
 
@@ -84,6 +67,23 @@ app = FastMCP(
     """,
     lifespan = lifespan,
 )
+
+
+LoaderConfig = Annotated[
+    Union[LoadCsv, LoadSql],
+    Field(
+        discriminator = 'type',
+        description = 'Configuration for dataset loader',
+        examples = [
+            {'type': 'csv',
+             'path': 'input.csv'},
+            {'type': 'sql',
+             'sql': 'SELECT * FROM table',
+             'drivername': 'mysql',
+             'host': 'localhost'},
+        ],
+    ),
+]
 
 
 @app.tool
@@ -194,4 +194,77 @@ async def transformer_view(
 ) -> TransformSequence:
     """Get full definition of current transformer sequence"""
     return ctx.fastmcp.state.pipeline.transform
+
+
+@app.prompt
+def generate_request_to_construct_anonymization_pipeline(
+    datasource: str = Field(
+        description = inspect.cleandoc("""
+            Describe where the dataset is.
+            Could be a path to CSV file on mcp-anon server.
+            Or it could be a connection URL to database.
+        """),
+        examples = [
+            'target/examples.csv file on the server',
+            'postgresql://localhost:5432/database',
+        ],
+    ),
+    data_description: str = Field(
+        description = 'What the dataset is. Whose personal information does it contain.',
+        examples = [
+            'employee salary',
+            'customer survey',
+        ],
+    ),
+    purpose: str = Field(
+        default = 'make available publicly',
+        description = 'How will the anonymized data be used. Who is the audience.',
+        examples = [
+            'archive for long-term storage',
+        ],
+    ),
+    threat_actor: str = Field(
+        default = 'regular hacker',
+        description = inspect.cleandoc("""
+            Who are you protecting the sensitive data from?
+            What are their objectives?
+            What resources do they have?
+            What external data they might have access to that help with re-identification?
+        """),
+    ),
+    legal_framework: str = Field(
+        default = 'GDPR and global best practices',
+        description = inspect.cleandoc("""
+            What legal framework should we be concerned about.
+            For example, specific law of specific country.
+        """),
+    ),
+) -> str:
+    """Generate user request to construct anonymization pipeline"""
+    # TODO template in other input fields
+    return inspect.cleandoc(f"""
+        Help me Python program to anonymize dataset from:
+
+        {datasource}
+
+        Guide me through the following steps:
+
+        - First, examine the dataset schema.
+        - Classify fields into one of the following classes:
+          - "Direct identifier": Data unique to individual which an attacker can
+            directly use to identify data subject.
+          - "Indirect identifier": Data not unique to individual but attacker may
+            use in combination with other fields or external data to re-identify data subject.
+          - "Sensitive attribute"
+          - "Ambiguous": Can not classify yet.
+            For exmaple, field name might be unclear.
+            Or field contain free-form text.
+        - Get my feedback on the field classification.
+          Ask for missing information needed to classify currently ambiguous fields.
+        - Once there are no more ambiguous fields,
+          apply anonymization technique step-by-step.
+          Confirming how the dataset changed at each step and explain the step to me.
+        - Evaluate the anonymity of resulting dataset.
+        - Export the pipeline program and give it to me.
+    """)
 
