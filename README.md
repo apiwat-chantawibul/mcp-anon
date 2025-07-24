@@ -58,6 +58,7 @@ instructed to only use arbitrary code as a last resort.
 
 See the corresponding documentation for each MCP client below:
 
+- [cursor](integration/cursor/README.md)
 - [gemini-cli](integration/gemini-cli/README.md)
-- oterm (planned)
+- [oterm](integration/oterm/README.md)
 
