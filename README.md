@@ -5,6 +5,42 @@
 The following are designed features for the server.
 Most of them have not yet been implemented.
 
+## Architecture
+
+```mermaid
+classDiagram
+  class user["User"] {
+    🛋️👑 lazy boss
+    ⚖️ final judge
+  }
+  class mcp_client["MCP Client"] {
+    📞 coordinator
+    🤵 butler
+  }
+  class llm["LLM"] {
+    👔 consultant
+    ✨ flexible
+    📚 knowledgeable
+    😬🧨 fallible
+  }
+  class mcp_anon["MCP Server (Anonymization Helper)"] {
+    🛠️ anoymization toolbox
+    🔐 restrict view of sensitive data
+    🧭 guide workflow
+    👷 build pipeline
+    📊 evaluate pipeline
+  }
+  class database["Database"]
+  class guide_book["Guide Book"]
+
+  user --> mcp_client : request help
+  user --> mcp_anon : authorize DB access
+  mcp_client --> llm : get intelligence
+  mcp_client --> mcp_anon : use tool
+  mcp_anon --> database : get raw data
+  mcp_anon --> guide_book : reference
+```
+
 ## Control LLM access to your sensitive data
 
 By default, `mcp-anon` only shares metadata, noised statisitcs, and synthetic
