@@ -1,7 +1,7 @@
 from pathlib import Path
 from typing import Annotated, Union
 from contextlib import asynccontextmanager
-import inspect
+from inspect import cleandoc
 
 from fastmcp import (
     FastMCP,
@@ -199,7 +199,7 @@ async def transformer_view(
 @app.prompt
 def generate_request_to_construct_anonymization_pipeline(
     datasource: str = Field(
-        description = inspect.cleandoc("""
+        description = cleandoc("""
             Describe where the dataset is.
             Could be a path to CSV file on mcp-anon server.
             Or it could be a connection URL to database.
@@ -225,7 +225,7 @@ def generate_request_to_construct_anonymization_pipeline(
     ),
     threat_actor: str = Field(
         default = 'regular hacker',
-        description = inspect.cleandoc("""
+        description = cleandoc("""
             Who are you protecting the sensitive data from?
             What are their objectives?
             What resources do they have?
@@ -234,7 +234,7 @@ def generate_request_to_construct_anonymization_pipeline(
     ),
     legal_framework: str = Field(
         default = 'GDPR and global best practices',
-        description = inspect.cleandoc("""
+        description = cleandoc("""
             What legal framework should we be concerned about.
             For example, specific law of specific country.
         """),
@@ -242,7 +242,7 @@ def generate_request_to_construct_anonymization_pipeline(
 ) -> str:
     """Generate user request to construct anonymization pipeline"""
     # TODO template in other input fields
-    return inspect.cleandoc(f"""
+    return cleandoc(f"""
         Help me Python program to anonymize dataset from:
 
         {datasource}
