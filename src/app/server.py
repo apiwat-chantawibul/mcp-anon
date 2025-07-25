@@ -196,75 +196,122 @@ async def transformer_view(
     return ctx.fastmcp.state.pipeline.transform
 
 
+# NOTE: Can not use
+#
+#     arg: str = Field(default = ..., description = ...)
+#
+# pattern because there seems to be a bug in mcp library that does not extract
+# default value from Field properly. Instead, we need to use
+#
+#     arg: Annotated[str, Field(description = ...)] = ...
 @app.prompt
 def generate_request_to_construct_anonymization_pipeline(
-    datasource: str = Field(
-        description = cleandoc("""
-            Describe where the dataset is.
-            Could be a path to CSV file on mcp-anon server.
-            Or it could be a connection URL to database.
-        """),
-        examples = [
-            'target/examples.csv file on the server',
-            'postgresql://localhost:5432/database',
-        ],
-    ),
-    data_description: str = Field(
-        description = 'What the dataset is. Whose personal information does it contain.',
-        examples = [
-            'employee salary',
-            'customer survey',
-        ],
-    ),
-    purpose: str = Field(
-        default = 'make available publicly',
-        description = 'How will the anonymized data be used. Who is the audience.',
-        examples = [
-            'archive for long-term storage',
-        ],
-    ),
-    threat_actor: str = Field(
-        default = 'regular hacker',
-        description = cleandoc("""
-            Who are you protecting the sensitive data from?
-            What are their objectives?
-            What resources do they have?
-            What external data they might have access to that help with re-identification?
-        """),
-    ),
-    legal_framework: str = Field(
-        default = 'GDPR and global best practices',
-        description = cleandoc("""
-            What legal framework should we be concerned about.
-            For example, specific law of specific country.
-        """),
-    ),
+    datasource: Annotated[
+        str,
+        Field(
+            description = cleandoc("""
+                Describe where the dataset is.
+                Could be a path to CSV file on mcp-anon server.
+                Or it could be a connection URL to database.
+            """),
+            examples = [
+                'target/examples.csv file on the server',
+                'postgresql://localhost:5432/database',
+            ],
+        ),
+    ],
+    data_description: Annotated[
+        str,
+        Field(
+            description = 'What kind of dataset it is. What personal information does it contain.',
+            examples = [
+                'The dataset contains employee salary',
+                'The dataset is from a customer survey',
+            ],
+        ),
+    ] = '',
+    purpose: Annotated[
+        str,
+        Field(
+            description = 'How will the anonymized data be used. Who is the audience.',
+            examples = [
+                'archive for long-term storage',
+                'make available publicly',
+            ],
+        ),
+    ] = '',
+    threat_actor: Annotated[
+        str,
+        Field(
+            description = cleandoc("""
+                Who are you protecting the sensitive data from?
+                What are their objectives?
+                What resources do they have?
+                What external data they might have access to that help with re-identification?
+            """),
+            examples = [
+                'financially motivated actors',
+                'nation-state actors'
+                'ideologues (hacktivists and terrorists)',
+                'thrill seekers and trolls',
+                'insiders',
+                'competitors',
+            ],
+        ),
+    ] = '',
+    legal_framework: Annotated[
+        str,
+        Field(
+            description = cleandoc("""
+                What legal framework should we be concerned about.
+                For example, specific law of specific country.
+            """),
+        ),
+    ] = 'GDPR',
 ) -> str:
     """Generate user request to construct anonymization pipeline"""
-    # TODO template in other input fields
-    return cleandoc(f"""
-        Help me Python program to anonymize dataset from:
+    sections = [
+        f"""
+            Help me create a Python pipeline to anonymize a dataset using "Data
+            Anonymization Toolbox" MCP server. The dataset is from:
 
-        {datasource}
+            {datasource}
+        """,
+        data_description,
+        purpose and f"""
+            The anonymized dataset should be fit to {purpose}
+        """,
+        threat_actor and f"""
+            The likely threat actors we wish to protect the sensitive data from are:
 
-        Guide me through the following steps:
+            {threat_actor}
+        """,
+        legal_framework and f"""
+            Consider the legal framework of {legal_framework}
+            when evaluating if resulting dataset is fit for purpose.
+        """,
+        """
+            Guide me through the following steps:
 
-        - First, examine the dataset schema.
-        - Classify fields into one of the following classes:
-          - "Direct identifier": Data unique to individual which an attacker can
-            directly use to identify data subject.
-          - "Indirect identifier": Data not unique to individual but attacker may
-            use in combination with other fields or external data to re-identify data subject.
-          - "Sensitive attribute"
-          - "Ambiguous": Can not classify yet.
-            For exmaple, field name might be unclear.
-            Or field contain free-form text.
-        - Get my feedback on the field classification.
-          Ask for missing information needed to classify currently ambiguous fields.
-        - Once there are no more ambiguous fields,
-          apply anonymization technique step-by-step.
-          Confirming how the dataset changed at each step and explain the step to me.
-        - Evaluate the anonymity of resulting dataset.
-        - Export the pipeline program and give it to me.
-    """)
+            - First, examine the dataset schema.
+            - Classify fields into one of the following classes:
+              - "Direct identifier": Data unique to individual which an attacker can
+                directly use to identify data subject.
+              - "Indirect identifier": Data not unique to individual but attacker may
+                use in combination with other fields or external data to re-identify data subject.
+              - "Sensitive attribute"
+              - "Ambiguous": Can not classify yet.
+                For exmaple, field name might be unclear.
+                Or field contain free-form text.
+            - Get my feedback on the field classification.
+              Ask for missing information needed to classify currently ambiguous fields.
+            - Once there are no more ambiguous fields,
+              apply anonymization technique step-by-step.
+              Confirming how the dataset changed at each step and explain the step to me.
+            - Evaluate the anonymity of resulting dataset.
+            - Export the pipeline program and give it to me.
+        """,
+    ]
+    prompt = '\n\n'.join(map(cleandoc, filter(None, sections)))
+    return prompt
 

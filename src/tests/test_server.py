@@ -1,5 +1,5 @@
 from pathlib import Path
-import inspect
+from inspect import cleandoc
 
 import pytest
 from fastmcp import FastMCP, Client
@@ -90,7 +90,7 @@ async def test_original_view_stats(input_load_config):
 
 
 async def test_custom_transform(input_load_config):
-    code = inspect.cleandoc("""
+    code = cleandoc("""
         def remove_salary_and_reset_id(df):
             df = df.drop(columns = 'salary')
             df['id'] = df.index
@@ -190,4 +190,24 @@ async def test_drop_non_existent_field(input_load_config):
                     'fields': 'non_existent',
                 }
             })
+
+
+async def test_generate_prompt():
+    args = {
+        'datasource': 'target/example.csv on MCP-anon server',
+        'legal_framework': 'Thai PDPA',
+    }
+    async with Client(app) as client:
+        result = await client.get_prompt(
+            'generate_request_to_construct_anonymization_pipeline',
+            args,
+        )
+        result_text = result.messages[0].content.text
+        assert f'legal framework of {args['legal_framework']}' in result_text, cleandoc("""
+            Given legal framework should replace default value.
+        """)
+        assert 'threat actor' not in result_text, cleandoc("""
+            Threat_actor argument is not set, so the whole section should be
+            excluded from resulting prompt.
+        """)
 
