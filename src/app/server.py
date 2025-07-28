@@ -14,8 +14,8 @@ from pydantic import (
 )
 import pandas as pd
 
-from app.state import State
-from app.pipeline import CustomTransform, TransformSequence
+from app.state import State, PipelineView
+from app.pipeline import CustomTransform
 from app.pipeline.pandas import LoadCsv, LoadSql, BinTransform, DropTransform
 from app.dataset.view.schema import get_dataset_schema, DatasetSchema
 from app.dataset.view.stats import get_dataset_stats, DatasetStats
@@ -176,24 +176,27 @@ TransformerConfig = Annotated[
 async def transformer_append(
     transform: TransformerConfig,
     ctx: Context,
-) -> None:
+) -> PipelineView:
     """Append a new step at the end of transformer sequence.
 
     - The transform will be immediately tested against dataset.
     - If the transform causes error, it will not be appended to sequence.
-    - On success, return null.
+
+    Returns definition of current pipeline on success.
     """
     ctx.fastmcp.state.append_transform(transform)
+    return ctx.fastmcp.state.view_pipeline()
 
 
-# TODO: Optionally specify ID to selectively view part of transformer
+# TODO: Optionally let client focus on specific part.
+# Maybe by specifying ID of component.
 # TODO: Optionally show source code implementation
 @app.tool
-async def transformer_view(
+async def pipeline_view(
     ctx: Context,
-) -> TransformSequence:
-    """Get full definition of current transformer sequence"""
-    return ctx.fastmcp.state.pipeline.transform
+) -> PipelineView:
+    """Get status of current pipeline"""
+    return ctx.fastmcp.state.view_pipeline()
 
 
 # NOTE: Can not use

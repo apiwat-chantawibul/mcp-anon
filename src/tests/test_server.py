@@ -93,26 +93,31 @@ async def test_custom_transform(input_load_config):
     code = cleandoc("""
         def remove_salary_and_reset_id(df):
             df = df.drop(columns = 'salary')
-            df['id'] = df.index
+            df['id'] -= 101
             return df
     """)
     expected_stats = {
-        'id': {'25%': 0.25,
-               '50%': 0.5,
-               '75%': 0.75,
-               'count': 2.0,
-               'max': 1.0,
-               'mean': 0.5,
-               'min': 0.0,
-               'std': 0.7071067811865476},
-        'married': {'25%': 0.25,
-                    '50%': 0.5,
-                    '75%': 0.75,
-                    'count': 2.0,
-                    'max': 1.0,
-                    'mean': 0.5,
-                    'min': 0.0,
-                    'std': 0.7071067811865476}}
+        'id': {
+            '25%': 0.25,
+            '50%': 0.5,
+            '75%': 0.75,
+            'count': 2.0,
+            'max': 1.0,
+            'mean': 0.5,
+            'min': 0.0,
+            'std': 0.7071067811865476
+        },
+        'married': {
+            '25%': 0.25,
+            '50%': 0.5,
+            '75%': 0.75,
+            'count': 2.0,
+            'max': 1.0,
+            'mean': 0.5,
+            'min': 0.0,
+            'std': 0.7071067811865476
+        },
+    }
     results = {}
     async with Client(app) as client:
         results['set'] = await client.call_tool('loader_set', input_load_config)
@@ -122,18 +127,30 @@ async def test_custom_transform(input_load_config):
                 'function_definition': code,
             }
         })
+        assert results['append'].structured_content == {
+            'result_schema': {
+                'fields': [
+                    {'name': 'id', 'datatype': 'int64[pyarrow]'},
+                    {'name': 'name', 'datatype': 'string[pyarrow]'},
+                    {'name': 'married', 'datatype': 'int64[pyarrow]'},
+                ],
+            },
+            'pipeline': {
+                'load': input_load_config['loader_config'],
+                'transform': {
+                    'type': 'sequence',
+                    'sequence': [
+                        {
+                            'function_definition': code,
+                            'type': 'custom',
+                        },
+                    ],
+                },
+                'export': None,
+            },
+        }
         results['stats'] = await client.call_tool('result_view_stats')
         assert results['stats'].structured_content == expected_stats
-        results['view'] = await client.call_tool('transformer_view')
-        assert results['view'].structured_content == {
-            'type': 'sequence',
-            'sequence': [
-                {
-                    'function_definition': code,
-                    'type': 'custom',
-                },
-            ],
-        }
 
 
 async def test_bin_transform(input_load_config):

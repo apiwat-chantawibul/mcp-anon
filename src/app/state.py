@@ -11,6 +11,13 @@ from pydantic import (
 
 from app.pipeline import Pipeline, Transform
 from app.settings import get_settings
+from app.dataset.view.schema import get_dataset_schema, DatasetSchema
+
+
+class PipelineView(BaseModel):
+    """Pipeline status report for client"""
+    pipeline: Pipeline[pd.DataFrame]
+    result_schema: DatasetSchema
 
 
 class State(BaseModel):
@@ -40,6 +47,19 @@ class State(BaseModel):
     def result_dataset(self) -> pd.DataFrame:
         """Dataset after it is transformed"""
         return self.pipeline.transform(self.original_dataset.copy())
+
+    # TODO: add option for showing source code
+    def view_pipeline(self) -> PipelineView:
+        # TODO: Make this return properly typed PipelineView.
+        # Currently have a bug when trying to create Pipeline because
+        # pydantic is trying to create abstract class instead of
+        # just taking concrete subclass without validation.
+        return {
+            # NOTE: This give client back resolved CSV path on server.
+            # This leak server's internal filesystem structure. Might want to change.
+            'pipeline': self.pipeline,
+            'result_schema': get_dataset_schema(self.result_dataset),
+        }
 
     def append_transform(self, transform: Transform) -> None:
         """Append new transformation step and update app state.
