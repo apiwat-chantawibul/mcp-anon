@@ -4,7 +4,7 @@ from inspect import cleandoc
 import pytest
 from fastmcp import FastMCP, Client
 
-from app.server import app, LoaderConfig
+from app.server import app
 
 
 async def test_describe_initial():

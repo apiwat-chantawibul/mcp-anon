@@ -1,4 +1,4 @@
-from typing import Any, Literal
+from typing import Literal
 from abc import ABC, abstractmethod
 from collections.abc import Callable
 import inspect
@@ -6,7 +6,6 @@ import inspect
 from pydantic import (
     BaseModel,
     Field,
-    SerializeAsAny,
 )
 
 
@@ -49,16 +48,4 @@ class Export[Dataset](Step[Dataset]):
     @abstractmethod
     def __call__(self, ds: Dataset) -> None:
         ...
-
-
-class TransformSequence[Dataset](Transform[Dataset]):
-    """Transformation built from a sequential chain of others"""
-
-    type: Literal['sequence'] = 'sequence'
-    sequence: list[SerializeAsAny[Transform[Dataset]]] = []
-
-    def __call__(self, ds: Dataset) -> Dataset:
-        for transform in self.sequence:
-            ds = transform(ds)
-        return ds
 

@@ -10,13 +10,11 @@ from fastmcp import (
 from pydantic import (
     BaseModel,
     Field,
-    model_validator,
 )
 import pandas as pd
 
 from app.state import State, PipelineView
-from app.pipeline import CustomTransform
-from app.pipeline.pandas import LoadCsv, LoadSql, BinTransform, DropTransform
+from app.pipeline import AnyLoad, AnyTransform, AnyExport
 from app.dataset.view.schema import get_dataset_schema, DatasetSchema
 from app.dataset.view.stats import get_dataset_stats, DatasetStats
 
@@ -69,26 +67,9 @@ app = FastMCP(
 )
 
 
-LoaderConfig = Annotated[
-    Union[LoadCsv, LoadSql],
-    Field(
-        discriminator = 'type',
-        description = 'Configuration for dataset loader',
-        examples = [
-            {'type': 'csv',
-             'path': 'input.csv'},
-            {'type': 'sql',
-             'sql': 'SELECT * FROM table',
-             'drivername': 'mysql',
-             'host': 'localhost'},
-        ],
-    ),
-]
-
-
 @app.tool
 async def loader_set(
-    loader_config: LoaderConfig,
+    loader_config: AnyLoad,
     ctx: Context,
 ) -> DatasetSchema:
     """Specify source of data to be anonymized.
@@ -113,7 +94,7 @@ async def loader_set(
 @app.tool
 async def loader_describe(
     ctx: Context,
-) ->  LoaderConfig | None:
+) ->  AnyLoad | None:
     """Describe current configuration of loader."""
     load = ctx.fastmcp.state.pipeline.load
     if load is None:
@@ -154,19 +135,6 @@ async def result_view_stats(
     return get_dataset_stats(ctx.fastmcp.state.result_dataset)
 
 
-TransformerConfig = Annotated[
-    Union[
-        BinTransform,
-        DropTransform,
-        CustomTransform[pd.DataFrame],
-    ],
-    Field(
-        discriminator = 'type',
-        description = 'Configuration for a transformation step',
-    ),
-]
-
-
 # TODO: return tranformation ID
 # - so it can be referenced when deleting
 # - ID format should be semantic.
@@ -174,7 +142,7 @@ TransformerConfig = Annotated[
 # but defaulting to at the end?
 @app.tool
 async def transformer_append(
-    transform: TransformerConfig,
+    transform: AnyTransform,
     ctx: Context,
 ) -> PipelineView:
     """Append a new step at the end of transformer sequence.

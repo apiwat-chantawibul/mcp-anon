@@ -16,7 +16,7 @@ from app.dataset.view.schema import get_dataset_schema, DatasetSchema
 
 class PipelineView(BaseModel):
     """Pipeline status report for client"""
-    pipeline: Pipeline[pd.DataFrame]
+    pipeline: Pipeline
     result_schema: DatasetSchema
 
 
@@ -30,7 +30,7 @@ class State(BaseModel):
     model_config = ConfigDict(arbitrary_types_allowed = True)
 
     # TODO: use xarray dataset to support multi-table dataset?
-    pipeline: Pipeline[pd.DataFrame] = Pipeline()
+    pipeline: Pipeline = Pipeline()
     workdir: Path = Field(
         default_factory = lambda: get_settings().pipeline_dir,
         description = 'Where pipeline is stored on mcp-anon server',
@@ -50,16 +50,12 @@ class State(BaseModel):
 
     # TODO: add option for showing source code
     def view_pipeline(self) -> PipelineView:
-        # TODO: Make this return properly typed PipelineView.
-        # Currently have a bug when trying to create Pipeline because
-        # pydantic is trying to create abstract class instead of
-        # just taking concrete subclass without validation.
-        return {
+        return PipelineView(
             # NOTE: This give client back resolved CSV path on server.
             # This leak server's internal filesystem structure. Might want to change.
-            'pipeline': self.pipeline,
-            'result_schema': get_dataset_schema(self.result_dataset),
-        }
+            pipeline = self.pipeline,
+            result_schema = get_dataset_schema(self.result_dataset),
+        )
 
     def append_transform(self, transform: Transform) -> None:
         """Append new transformation step and update app state.

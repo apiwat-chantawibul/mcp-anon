@@ -3,18 +3,21 @@ from pydantic import (
     SerializeAsAny,
 )
 
-from .step import (
-    Load,
-    Transform,
-    TransformSequence,
-    Export,
+from .step_union import (
+    AnyLoad,
+    AnyExport,
 )
+from .transform_sequence import TransformSequence
 
 
-class Pipeline[Dataset](BaseModel):
+class Pipeline(BaseModel):
     """Pipeline for loading, transforming, and exporting dataset"""
 
-    load: SerializeAsAny[Load[Dataset]] | None = None
-    transform: SerializeAsAny[Transform[Dataset]] = TransformSequence()
-    export: SerializeAsAny[Export[Dataset]] | None = None
+    # TODO: Validate dataset type is compatible.
+    # This will matter when pipeline could act on pandas.DataFrame or xarray.Dataset.
+    load: AnyLoad | None = None
+    transform: TransformSequence = TransformSequence()
+    # TODO: replace with
+    #     export: AnyExport | None = None
+    export: None = None
 
