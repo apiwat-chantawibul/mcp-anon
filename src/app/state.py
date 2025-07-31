@@ -9,7 +9,7 @@ from pydantic import (
     Field,
 )
 
-from app.pipeline import Pipeline, Transform
+from app.pipeline import Pipeline, Transform, Load
 from app.settings import get_settings
 from app.dataset.view.schema import get_dataset_schema, DatasetSchema
 
@@ -47,6 +47,12 @@ class State(BaseModel):
     def result_dataset(self) -> pd.DataFrame:
         """Dataset after it is transformed"""
         return self.pipeline.transform(self.original_dataset.copy())
+
+    def set_load(self, load: Load) -> None:
+        if self.pipeline.load is not None:
+            # TODO: return previous load config when replacing.
+            raise NotImplementedError('Can not replace loader once set')
+        self.pipeline.load = load
 
     # TODO: add option for showing source code
     def view_pipeline(self) -> PipelineView:

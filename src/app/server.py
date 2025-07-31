@@ -77,17 +77,11 @@ async def loader_set(
     - The server will remember the selected source for further operations.
     - Since the goal is to build pipeline,
       you can use representative example of the dataset instead of raw dataset.
-    - The source need not be the actual or whole data.
-      It just need to be representative so pipeline can be designed based on its structure.
     - Paths and URIs are resolved from server perspective, not the client's.
 
     On success, immediately return result from original_dataset_schema tool.
     """
-    pipeline = ctx.fastmcp.state.pipeline
-    if pipeline.load is not None:
-        # TODO: return previous load config when replacing.
-        raise NotImplementedError('Can not replace loader once set')
-    pipeline.load = loader_config
+    ctx.fastmcp.state.set_load(loader_config)
     return await original_view_schema.fn(ctx)
 
 
