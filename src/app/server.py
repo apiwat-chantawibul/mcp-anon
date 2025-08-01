@@ -67,11 +67,16 @@ app = FastMCP(
 )
 
 
+class Response[Content](BaseModel):
+    content: Content
+    warnings: list[str] = []
+
+
 @app.tool
 async def loader_set(
     loader_config: AnyLoad,
     ctx: Context,
-) -> DatasetSchema:
+) -> Response[DatasetSchema]:
     """Specify source of data to be anonymized.
 
     - The server will remember the selected source for further operations.
@@ -79,10 +84,22 @@ async def loader_set(
       you can use representative example of the dataset instead of raw dataset.
     - Paths and URIs are resolved from server perspective, not the client's.
 
-    On success, immediately return result from original_dataset_schema tool.
+    On success, return schema of loaded dataset before tranformers are applied.
     """
-    ctx.fastmcp.state.set_load(loader_config)
-    return await original_view_schema.fn(ctx)
+    previous = ctx.fastmcp.state.pipeline.load
+    warnings = []
+
+    if previous == loader_config:
+        warnings.append('No change to existing loader')
+    else:
+        if previous is not None:
+            warnings.append('Previous loader configuration is replaced')
+        ctx.fastmcp.state.set_load(loader_config)
+
+    return {
+        'content': get_dataset_schema(ctx.fastmcp.state.original_dataset),
+        'warnings': warnings,
+    }
 
 
 @app.tool

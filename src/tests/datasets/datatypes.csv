@@ -1,0 +1,2 @@
+boolean,int,float,string,date,datetime
+false,123,1.234,'1234',2025-05-13,2024-03-07T23:01+7

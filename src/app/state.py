@@ -49,9 +49,10 @@ class State(BaseModel):
         return self.pipeline.transform(self.original_dataset.copy())
 
     def set_load(self, load: Load) -> None:
-        if self.pipeline.load is not None:
-            # TODO: return previous load config when replacing.
-            raise NotImplementedError('Can not replace loader once set')
+        if 'result_dataset' in self.__dict__:
+            del self.result_dataset
+        if 'original_dataset' in self.__dict__:
+            del self.original_dataset
         self.pipeline.load = load
 
     # TODO: add option for showing source code

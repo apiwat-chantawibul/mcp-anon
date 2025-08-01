@@ -40,20 +40,58 @@ async def test_missing_load_type(input_load_config):
 
 
 async def test_original_view_schema(input_load_config):
-    expected_schema = {'fields': [
-        {'name': 'id', 'datatype': 'int64[pyarrow]'},
-        {'name': 'name', 'datatype': 'string[pyarrow]'},
-        {'name': 'salary', 'datatype': 'int64[pyarrow]'},
-        {'name': 'married', 'datatype': 'int64[pyarrow]'},
-    ]}
+    expected_schema = {
+        'fields': [
+            {'name': 'id',      'datatype': 'int64[pyarrow]'},
+            {'name': 'name',    'datatype': 'string[pyarrow]'},
+            {'name': 'salary',  'datatype': 'int64[pyarrow]'},
+            {'name': 'married', 'datatype': 'int64[pyarrow]'},
+        ],
+    }
     results = {}
     async with Client(app) as client:
         results['set'] = await client.call_tool('loader_set', input_load_config)
-        assert results['set'].structured_content == expected_schema
+        assert results['set'].structured_content == {
+            'content': expected_schema,
+            'warnings': [],
+        }
         results['original_schema'] = await client.call_tool('original_view_schema')
         assert results['original_schema'].structured_content == expected_schema
         results['result_schema'] = await client.call_tool('result_view_schema')
         assert results['result_schema'].structured_content == expected_schema
+
+
+async def test_warn_replace_loader(input_load_config):
+    results = {}
+    async with Client(app) as client:
+        results['first'] = await client.call_tool('loader_set', input_load_config)
+        results['second'] = await client.call_tool('loader_set', {
+            'loader_config': {
+                'type': 'csv',
+                'path': str(Path(__file__).parent / 'datasets/datatypes.csv'),
+            }
+        })
+        assert results['second'].structured_content == {
+            'content': {
+                'fields': [
+                    {'name': 'boolean',  'datatype': 'bool[pyarrow]'},
+                    {'name': 'int',      'datatype': 'int64[pyarrow]'},
+                    {'name': 'float',    'datatype': 'double[pyarrow]'},
+                    {'name': 'string',   'datatype': 'string[pyarrow]'},
+                    {'name': 'date',     'datatype': 'string[pyarrow]'},
+                    {'name': 'datetime', 'datatype': 'string[pyarrow]'},
+                ],
+            },
+            'warnings': ['Previous loader configuration is replaced'],
+        }
+
+
+async def test_warn_loader_not_changed(input_load_config):
+    results = {}
+    async with Client(app) as client:
+        results['first'] = await client.call_tool('loader_set', input_load_config)
+        results['second'] = await client.call_tool('loader_set', input_load_config)
+        assert results['second'].data.warnings == ['No change to existing loader']
 
 
 async def test_original_view_stats(input_load_config):
