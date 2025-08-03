@@ -67,8 +67,8 @@ app = FastMCP(
 )
 
 
-class Response[Content](BaseModel):
-    content: Content
+class LoaderSetResponse[Content](BaseModel):
+    content: DatasetSchema
     warnings: list[str] = []
 
 
@@ -76,7 +76,7 @@ class Response[Content](BaseModel):
 async def loader_set(
     loader_config: AnyLoad,
     ctx: Context,
-) -> Response[DatasetSchema]:
+) -> LoaderSetResponse:
     """Specify source of data to be anonymized.
 
     - The server will remember the selected source for further operations.
