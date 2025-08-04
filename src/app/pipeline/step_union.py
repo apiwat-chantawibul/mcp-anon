@@ -13,7 +13,6 @@ from .pandas import (
     DropTransform,
 )
 from .custom_transform import CustomTransform
-from .transform_sequence import TransformSequence
 
 
 AnyLoad = Annotated[
@@ -41,14 +40,17 @@ AnyTransform = Annotated[
         BinTransform,
         DropTransform,
         CustomTransform[pd.DataFrame],
-        TransformSequence,
+        # TODO: Include TransformSequence as part of AnyTransform.
+        #
+        # While I could use "forward reference" feature of pydantic to resolve
+        # mutual dependency between TransformSequence and AnyTransform, but
+        # it seems like this confuses FastMCP making it fail integration tests.
     ],
     Field(
         discriminator = 'type',
         description = 'Configuration for a transformation step',
     ),
 ]
-TransformSequence.model_rebuild()
 
 
 AnyExport = Annotated[
