@@ -39,10 +39,8 @@ class Pipeline(BaseModel):
     def to_file(self, path_or_file):
         """Save pipeline definition as a file"""
         with ensure_file(path_or_file, mode = 'w') as f:
-            # TODO: Make dumped yaml more concise by excluding default values.
-            # Simple exclude_defaults option does not work because it also excluded union tags.
             yaml.safe_dump(
-                self.model_dump(mode = 'json'),
+                self.model_dump(mode = 'json', exclude_none = True),
                 f,
             )
 
