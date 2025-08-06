@@ -1,6 +1,7 @@
 ### Core ###
 fastmcp
 pandas[performance, sql-other]
+pyyaml
 
 # For saner datatype reporting
 pyarrow

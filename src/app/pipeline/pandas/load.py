@@ -1,9 +1,9 @@
 from typing import Literal
+from pathlib import Path
 
 from pydantic import (
     BaseModel,
     Field,
-    FilePath,
 )
 import pandas as pd
 import sqlalchemy as sa
@@ -14,7 +14,7 @@ from ..step import Load
 class LoadCsv(Load[pd.DataFrame]):
     """Load data from CSV file"""
     type: Literal['csv'] = 'csv'
-    path: FilePath
+    path: Path
 
     def __call__(self) -> pd.DataFrame:
         return pd.read_csv(

@@ -11,6 +11,7 @@ from .pandas import (
     LoadSql,
     BinTransform,
     DropTransform,
+    ExportCsv,
 )
 from .custom_transform import CustomTransform
 
@@ -54,8 +55,7 @@ AnyTransform = Annotated[
 
 
 AnyExport = Annotated[
-    # TODO: Replace with Union[...],
-    None,
+    Union[ExportCsv],
     Field(
         discriminator = 'type',
         description = 'Configuration for a dataset exporter',

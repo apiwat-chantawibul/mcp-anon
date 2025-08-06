@@ -67,7 +67,7 @@ app = FastMCP(
 )
 
 
-class LoaderSetResponse[Content](BaseModel):
+class LoaderSetResponse(BaseModel):
     content: DatasetSchema
     warnings: list[str] = []
 
@@ -176,6 +176,32 @@ async def pipeline_view(
 ) -> PipelineView:
     """Get status of current pipeline"""
     return ctx.fastmcp.state.view_pipeline()
+
+
+class ExporterSetResponse(BaseModel):
+    success: bool
+    warnings: list[str] = []
+
+
+@app.tool
+async def exporter_set(
+    exporter_config: AnyExport,
+    ctx: Context,
+) -> ExporterSetResponse:
+    previous = ctx.fastmcp.state.pipeline.export
+    warnings = []
+
+    if previous == exporter_config:
+        warnings.append('No change to existing exporter')
+    else:
+        if previous is not None:
+            warnings.append('Previous exporter configuration is replaced')
+        ctx.fastmcp.state.pipeline.export = exporter_config
+
+    return {
+        'success': True,
+        'warnings': warnings,
+    }
 
 
 # NOTE: Can not use
