@@ -9,7 +9,7 @@ from pydantic import (
     Field,
 )
 
-from app.pipeline import Pipeline, Transform, Load
+from app.pipeline import Pipeline, Load, Transform, Export
 from app.settings import get_settings
 from app.dataset.view.schema import get_dataset_schema, DatasetSchema
 
@@ -99,4 +99,7 @@ class State(BaseModel):
         """
         # TODO write dynamic code to files according to self.pipeline
         raise NotImplementedError()
+
+    def set_export(self, export: Export) -> None:
+        self.pipeline.export = export
 

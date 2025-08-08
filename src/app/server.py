@@ -196,7 +196,7 @@ async def exporter_set(
     else:
         if previous is not None:
             warnings.append('Previous exporter configuration is replaced')
-        ctx.fastmcp.state.pipeline.export = exporter_config
+        ctx.fastmcp.state.set_export(exporter_config)
 
     return {
         'success': True,
