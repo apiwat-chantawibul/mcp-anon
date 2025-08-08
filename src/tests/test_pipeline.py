@@ -3,6 +3,7 @@ from tempfile import TemporaryFile
 
 import pytest
 import yaml
+from pydantic import ValidationError
 
 from app.pipeline import Pipeline
 
@@ -29,4 +30,13 @@ def test_pipeline_file_roundtrip(path):
         f.seek(0)
         reloaded = Pipeline.from_file(f)
     assert loaded == reloaded
+
+
+@pytest.mark.parametrize(
+    'path',
+    tuple(pipelines_directory.glob('invalid/*.yaml')),
+)
+def test_invalid_pipeline_file(path):
+    with pytest.raises(ValidationError):
+        loaded = Pipeline.from_file(path)
 

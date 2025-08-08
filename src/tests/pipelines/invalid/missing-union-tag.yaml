@@ -1,0 +1,16 @@
+load:
+  type: csv
+  path: datasets/small.csv
+transform:
+  type: sequence
+  sequence:
+  - input_field: salary
+    bins:
+    - 0
+    - 10000
+    - 20000
+    - 30000
+export:
+  type: csv
+  path: datasets/output.csv
+

@@ -1,0 +1,4 @@
+load:
+  type: csv
+  filepath: datasets/small.csv
+
