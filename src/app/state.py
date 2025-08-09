@@ -1,3 +1,4 @@
+from typing import Self
 from pathlib import Path
 import shutil
 from functools import cached_property
@@ -54,6 +55,7 @@ class State(BaseModel):
         if 'original_dataset' in self.__dict__:
             del self.original_dataset
         self.pipeline.load = load
+        self.persist()
 
     # TODO: add option for showing source code
     def view_pipeline(self) -> PipelineView:
@@ -86,6 +88,8 @@ class State(BaseModel):
             except Exception as e:
                 transform_sequence.pop()
                 raise e
+            else:
+                self.persist()
 
     def write_pipeline_code():
         """
@@ -102,4 +106,16 @@ class State(BaseModel):
 
     def set_export(self, export: Export) -> None:
         self.pipeline.export = export
+        self.persist()
+
+    def persist(self) -> None:
+        """Persist application state to file"""
+        self.pipeline.to_file(self.workdir / 'pipeline.yaml')
+
+    @classmethod
+    def recover(cls, self) -> Self:
+        """Recover application state from file"""
+        return cls(
+            pipeline = self.pipeline.from_file(self.workdir / 'pipeline.yaml'),
+        )
 
