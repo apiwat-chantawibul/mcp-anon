@@ -23,6 +23,11 @@ class Settings(BaseSettings):
         ),
     )
 
+    autopersist: bool = Field(
+        True,
+        description = 'Save application state to file on every update',
+    )
+
 
 @cache
 def get_settings() -> Settings:
