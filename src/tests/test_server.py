@@ -5,6 +5,16 @@ import pytest
 from fastmcp import FastMCP, Client
 
 from app.server import app
+from app.settings import get_settings
+
+
+@pytest.fixture(scope = 'module', autouse = True)
+def disable_autopersist():
+    settings = get_settings()
+    original = settings.autopersist
+    settings.autopersist = False
+    yield
+    settings.autopersist = original
 
 
 async def test_describe_initial():
