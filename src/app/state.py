@@ -58,11 +58,14 @@ class State(BaseModel):
         """Dataset after it is transformed"""
         return self.pipeline.transform(self.original_dataset.copy())
 
-    def set_load(self, load: Load) -> None:
+    def clear_all_cache(self):
         if 'result_dataset' in self.__dict__:
             del self.result_dataset
         if 'original_dataset' in self.__dict__:
             del self.original_dataset
+
+    def set_load(self, load: Load) -> None:
+        self.clear_all_cache()
         self.pipeline.load = load
         self.autopersist()
 
@@ -120,19 +123,39 @@ class State(BaseModel):
     def set_export(self, export: Export) -> None:
         self.pipeline.export = export
         self.autopersist()
-
+    
     def persist(self) -> None:
         """Persist application state to file"""
         self.pipeline.to_file(self.workdir / 'pipeline.yaml')
 
     @classmethod
-    def recover(cls, self) -> Self:
-        """Recover application state from file"""
+    def restore(cls) -> Self:
+        """Restore application state from file"""
         return cls(
-            pipeline = self.pipeline.from_file(self.workdir / 'pipeline.yaml'),
+            pipeline = Pipeline.from_file(
+                get_settings().pipeline_dir / 'pipeline.yaml'
+            ),
         )
+
+    @classmethod
+    def init(cls, restore = None) -> Self:
+        if restore is None:
+            restore = get_settings().restore
+        if restore:
+            try:
+                return cls.restore()
+            except Exception:
+                pass
+        return cls()
 
     def autopersist(self) -> None:
         if self.is_autopersist:
             self.persist()
 
+    def clear_persisted(self) -> None:
+        (self.workdir / 'pipeline.yaml').unlink(missing_ok = True)
+        
+    def reset_pipeline(self) -> None:
+        self.clear_all_cache()
+        self.pipeline = Pipeline()
+        self.clear_persisted()

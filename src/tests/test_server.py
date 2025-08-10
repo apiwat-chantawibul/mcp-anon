@@ -2,19 +2,21 @@ from pathlib import Path
 from inspect import cleandoc
 
 import pytest
-from fastmcp import FastMCP, Client
+from fastmcp import Client
 
 from app.server import app
 from app.settings import get_settings
 
 
 @pytest.fixture(scope = 'module', autouse = True)
-def disable_autopersist():
+def start_empty_and_disable_autopersist():
     settings = get_settings()
-    original = settings.autopersist
+    original = settings.model_copy()
     settings.autopersist = False
+    settings.restore = False
     yield
-    settings.autopersist = original
+    settings.autopersist = original.autopersist
+    settings.restore = original.restore
 
 
 async def test_describe_initial():

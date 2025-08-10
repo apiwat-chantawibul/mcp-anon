@@ -21,7 +21,7 @@ from app.dataset.view.stats import get_dataset_stats, DatasetStats
 
 @asynccontextmanager
 async def lifespan(app: FastMCP):
-    app.state = State()
+    app.state = State.init()
     yield
 
 
@@ -70,6 +70,15 @@ app = FastMCP(
 class LoaderSetResponse(BaseModel):
     content: DatasetSchema
     warnings: list[str] = []
+
+
+@app.tool
+async def pipeline_reset(
+    ctx: Context,
+) -> PipelineView:
+    """Clear all persisted pipeline from previous session and start with empty pipeline"""
+    ctx.fastmcp.state.reset_pipeline()
+    return ctx.fastmcp.state.view_pipeline()
 
 
 @app.tool

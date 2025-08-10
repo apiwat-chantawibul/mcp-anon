@@ -27,6 +27,11 @@ class Settings(BaseSettings):
         True,
         description = 'Save application state to file on every update',
     )
+    
+    restore: bool = Field(
+        True,
+        description = 'Attempt to restore application state on initialization',
+    )
 
 
 @cache
