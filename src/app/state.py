@@ -18,7 +18,13 @@ from app.dataset.view.schema import get_dataset_schema, DatasetSchema
 class PipelineView(BaseModel):
     """Pipeline status report for client"""
     pipeline: Pipeline
-    result_schema: DatasetSchema
+    result_schema: DatasetSchema | None = Field(
+        None,
+        description = (
+            'Dataset schema of current pipeline result.'
+            ' Only available if loader stage is set and valid.'
+        ),
+    )
 
 
 class State(BaseModel):
@@ -62,11 +68,15 @@ class State(BaseModel):
 
     # TODO: add option for showing source code
     def view_pipeline(self) -> PipelineView:
+        try:
+            result_schema = get_dataset_schema(self.result_dataset)
+        except Exception:
+            result_schema = None
         return PipelineView(
             # NOTE: This give client back resolved CSV path on server.
             # This leak server's internal filesystem structure. Might want to change.
             pipeline = self.pipeline,
-            result_schema = get_dataset_schema(self.result_dataset),
+            result_schema = result_schema,
         )
 
     def append_transform(self, transform: Transform) -> None:
