@@ -198,6 +198,7 @@ async def test_custom_transform(input_load_config):
                 },
                 'export': None,
             },
+            'warnings': None,
         }
         results['stats'] = await client.call_tool('result_view_stats')
         assert results['stats'].structured_content == expected_stats

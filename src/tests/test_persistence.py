@@ -17,6 +17,10 @@ async def test_autopersist_and_restore(input_load_config):
             },
         },
         'result_schema': None,
+        'warnings': [(
+            'Can not display schema of resulting dataset.'
+            ' Dataset not available because loader is not set.'
+        )],
     }
     expected_filled_schema = {
         'pipeline': {
@@ -37,6 +41,7 @@ async def test_autopersist_and_restore(input_load_config):
                 {'datatype': 'int64[pyarrow]', 'name': 'salary'},
             ],
         },
+        'warnings': None,
     }
     results = {}
     async with Client(app) as client:

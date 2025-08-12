@@ -25,6 +25,12 @@ class PipelineView(BaseModel):
             ' Only available if loader stage is set and valid.'
         ),
     )
+    warnings: list[str] | None = None
+
+
+class LoaderNotSetException(Exception):
+    def __init__(self, message = 'Dataset not available because loader is not set.'):
+        super().__init__(message)
 
 
 class State(BaseModel):
@@ -50,7 +56,7 @@ class State(BaseModel):
     def original_dataset(self) -> pd.DataFrame:
         """Dataset after it is read from source"""
         if self.pipeline.load is None:
-            raise Exception('Dataset not available because loader is not set.')
+            raise LoaderNotSetException()
         return self.pipeline.load()
 
     @cached_property
@@ -71,15 +77,18 @@ class State(BaseModel):
 
     # TODO: add option for showing source code
     def view_pipeline(self) -> PipelineView:
+        warnings = []
         try:
             result_schema = get_dataset_schema(self.result_dataset)
-        except Exception:
+        except Exception as e:
+            warnings.append(f'Can not display schema of resulting dataset. {e}')
             result_schema = None
         return PipelineView(
             # NOTE: This give client back resolved CSV path on server.
             # This leak server's internal filesystem structure. Might want to change.
             pipeline = self.pipeline,
             result_schema = result_schema,
+            warnings = warnings or None,
         )
 
     def append_transform(self, transform: Transform) -> None:
