@@ -21,7 +21,7 @@ def pipelines():
 
 @pytest.mark.parametrize(
     'path',
-    tuple(pipelines_directory.glob('*.yaml')),
+    tuple(pipelines_directory.glob('valid/*.yaml')),
 )
 def test_pipeline_file_roundtrip(path):
     loaded = Pipeline.from_file(path)
