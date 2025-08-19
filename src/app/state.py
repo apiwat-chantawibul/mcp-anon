@@ -44,9 +44,9 @@ class State(BaseModel):
 
     # TODO: use xarray dataset to support multi-table dataset?
     pipeline: Pipeline = Pipeline()
-    workdir: Path = Field(
-        default_factory = lambda: get_settings().pipeline_dir,
-        description = 'Where pipeline is stored on mcp-anon server',
+    pipeline_file: Path = Field(
+        default_factory = lambda: get_settings().pipeline_file,
+        description = 'Path to persist pipeline definition file.',
     )
     is_autopersist: bool = Field(
         default_factory = lambda: get_settings().autopersist,
@@ -116,33 +116,20 @@ class State(BaseModel):
             else:
                 self.autopersist()
 
-    def write_pipeline_code():
-        """
-        # Copy anonymization pipeline template files to working directory
-        # TODO Copy static files used by pipeline into workdir
-        # TODO handle existing files
-        shutil.copytree(
-            Path(__file__).parent / 'pipeline/template',
-            self.workdir,
-        )
-        """
-        # TODO write dynamic code to files according to self.pipeline
-        raise NotImplementedError()
-
     def set_export(self, export: Export) -> None:
         self.pipeline.export = export
         self.autopersist()
     
     def persist(self) -> None:
         """Persist application state to file"""
-        self.pipeline.to_file(self.workdir / 'pipeline.yaml')
+        self.pipeline.to_file(self.pipeline_file)
 
     @classmethod
     def restore(cls) -> Self:
         """Restore application state from file"""
         return cls(
             pipeline = Pipeline.from_file(
-                get_settings().pipeline_dir / 'pipeline.yaml'
+                get_settings().pipeline_file
             ),
         )
 
@@ -162,7 +149,7 @@ class State(BaseModel):
             self.persist()
 
     def clear_persisted(self) -> None:
-        (self.workdir / 'pipeline.yaml').unlink(missing_ok = True)
+        self.pipeline_file.unlink(missing_ok = True)
         
     def reset_pipeline(self) -> None:
         self.clear_all_cache()

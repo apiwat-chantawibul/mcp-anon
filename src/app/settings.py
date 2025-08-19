@@ -14,12 +14,13 @@ class Settings(BaseSettings):
     model_config = SettingsConfigDict(
         env_prefix = 'ANON_',
     )
-
-    pipeline_dir: Path = Field(
-        'pipeline',
+    
+    pipeline_file: Path = Field(
+        'pipeline/pipeline.yaml',
         description = (
-            'Location for pipeline files.'
-            ' If running mcp-anon locally, mount client filesystem to this path to do collaborative edit.'
+            'Path on mcp-anon to persist pipeline definition file.'
+            ' The parent directory of this path serves as the base working directory for other pipeline files.'
+            ' When running mcp-anon container locally, mount your working directory to this base directory.'
         ),
     )
 
