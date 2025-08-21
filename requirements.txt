@@ -3,6 +3,10 @@ fastmcp
 pandas[performance, sql-other]
 pyyaml
 
+### CLI ###
+click
+devtools
+
 # For saner datatype reporting
 pyarrow
 
