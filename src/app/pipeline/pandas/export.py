@@ -14,5 +14,6 @@ class ExportCsv(Export[pd.DataFrame]):
     path: Path
 
     def __call__(self, ds: pd.DataFrame) -> None:
-        pd.to_csv(self.path, index = False)
+        self.path.parent.mkdir(parents = True, exist_ok = True)
+        ds.to_csv(self.path, index = False)
 
