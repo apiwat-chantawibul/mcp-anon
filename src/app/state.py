@@ -122,6 +122,7 @@ class State(BaseModel):
     
     def persist(self) -> None:
         """Persist application state to file"""
+        self.pipeline_file.parent.mkdir(parents = True, exist_ok = True)
         self.pipeline.to_file(self.pipeline_file)
 
     @classmethod
