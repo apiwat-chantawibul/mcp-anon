@@ -38,3 +38,22 @@ def test_inspect_json():
     # For JSON inspection, output must be a valid JSON
     from_json = Pipeline.model_validate(json.loads(result.stdout))
 
+
+def test_run(outdir):
+    runner = CliRunner()
+    result = runner.invoke(cli, [
+        'run',
+        'pipelines/valid/simple.yaml',
+    ])
+    assert not result.exception
+    outfile = outdir / 'small.csv'
+    assert outfile.is_file()
+    with open(outfile, 'r') as f:
+        outcontent = f.readlines()
+    expected_outcontent = [
+        'id,name,salary,married\n',
+        '101,alice,"(20000, 30000]",0\n',
+        '102,bob,"(10000, 20000]",1\n',
+    ]
+    assert outcontent == expected_outcontent
+

@@ -1,4 +1,5 @@
 from pathlib import Path
+import shutil
 
 import pytest
 
@@ -17,7 +18,22 @@ def workdir(session_monkeypatch):
     - test data are
     - and output files are allowed to be written.
     """
-    workdir = Path(__file__).parent / 'workdir'
-    session_monkeypatch.chdir(workdir)
-    yield workdir
+    path = Path(__file__).parent / 'workdir'
+    session_monkeypatch.chdir(path)
+    yield path
+
+
+def delete_path_if_exists(path: Path):
+    if path.is_file():
+        path.unlink()
+    elif path.is_dir():
+        shutil.rmtree(path)
+
+
+@pytest.fixture
+def outdir(workdir):
+    path = workdir / 'output'
+    delete_path_if_exists(path)
+    yield path
+    delete_path_if_exists(path)
 
