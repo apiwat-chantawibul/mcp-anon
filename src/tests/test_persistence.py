@@ -26,7 +26,7 @@ async def test_autopersist_and_restore(input_load_config):
         'pipeline': {
             'export': None,
             'load': {
-                'path': '/opt/app/src/tests/datasets/small.csv',
+                'path': 'datasets/small.csv',
                 'type': 'csv',
                 },
             'transform': {

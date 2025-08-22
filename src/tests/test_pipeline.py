@@ -8,15 +8,9 @@ from pydantic import ValidationError
 from app.pipeline import Pipeline
 
 
-pipelines_directory = Path(__file__).parent / 'pipelines'
-
-
-@pytest.fixture(scope = 'module')
-def pipelines():
-    return {
-        path.stem: yaml.safe_load(path)
-        for path in pipelines_directory.glob('*.yaml')
-    }
+# NOTE: I would love to use workdir fixture,
+# but it is not available at test collection time.
+pipelines_directory = Path(__file__).parent / 'workdir/pipelines'
 
 
 @pytest.mark.parametrize(

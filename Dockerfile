@@ -26,7 +26,8 @@ WORKDIR $BASE_DIR/src
 COPY src ./
 ENV PYTHONPATH=$BASE_DIR/src
 
-# Prepare universally accessible workdir.
+# Prepare universally accessible workdirs.
+RUN chmod 777 tests/workdir
 WORKDIR $BASE_DIR/workdir
 RUN chmod 777 .
 

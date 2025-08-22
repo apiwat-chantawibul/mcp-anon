@@ -1,4 +1,3 @@
-from pathlib import Path
 from inspect import cleandoc
 
 import pytest
@@ -30,7 +29,7 @@ def input_load_config():
     return {
         'loader_config': {
             'type': 'csv',
-            'path': str(Path(__file__).parent / 'datasets/small.csv'),
+            'path': 'datasets/small.csv',
         },
     }
 
@@ -80,7 +79,7 @@ async def test_warn_replace_loader(input_load_config):
         results['second'] = await client.call_tool('loader_set', {
             'loader_config': {
                 'type': 'csv',
-                'path': str(Path(__file__).parent / 'datasets/datatypes.csv'),
+                'path': 'datasets/datatypes.csv',
             }
         })
         assert results['second'].structured_content == {

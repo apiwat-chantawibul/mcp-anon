@@ -1,4 +1,3 @@
-from pathlib import Path
 import json
 
 import pytest
@@ -6,9 +5,6 @@ from click.testing import CliRunner
 
 from app.pipeline import Pipeline
 from app.pipeline.cli import cli
-
-
-pipelines_directory = Path(__file__).parent / 'pipelines'
 
 
 @pytest.mark.parametrize(
@@ -23,7 +19,7 @@ def test_inspect_pretty(extra_args):
     runner = CliRunner()
     result = runner.invoke(cli, [
         'inspect',
-        str(pipelines_directory / 'valid/simple.yaml'),
+        'pipelines/valid/simple.yaml',
         *extra_args,
     ])
     # For pretty formats, just do a smoke test
@@ -34,7 +30,7 @@ def test_inspect_json():
     runner = CliRunner()
     result = runner.invoke(cli, [
         'inspect',
-        str(pipelines_directory / 'valid/simple.yaml'),
+        'pipelines/valid/simple.yaml',
         '--format',
         'json',
     ])

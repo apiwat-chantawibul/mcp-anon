@@ -1,0 +1,7 @@
+# Where tests will use to autopersist pipeline.
+# This is different from `/pipelines` which contain test cases.
+/pipeline
+
+# Where exporter of test pipelines may specify as output location.
+/output
+

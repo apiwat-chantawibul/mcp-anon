@@ -13,5 +13,5 @@ transform:
     - 30000
 export:
   type: csv
-  path: datasets/output.csv
+  path: output/small.csv
 
