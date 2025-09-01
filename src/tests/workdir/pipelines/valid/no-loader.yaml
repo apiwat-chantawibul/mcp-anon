@@ -1,0 +1,17 @@
+# This pipeline is valid and can be loaded.
+# However, when pipeline_view is requested,
+# the server should warn it could not preview the schema.
+transform:
+  type: sequence
+  sequence:
+  - type: bin
+    input_field: salary
+    bins:
+    - 0
+    - 10000
+    - 20000
+    - 30000
+export:
+  type: csv
+  path: output/small.csv
+
