@@ -1,0 +1,22 @@
+load:
+  type: csv
+  path: datasets/small.csv
+transform:
+  type: sequence
+  sequence:
+  - type: bin
+    input_field: salary
+    bins:
+    - 0
+    - 10000
+    - 20000
+    - 30000
+  - type: drop
+    fields:
+    - first_name
+    - last_name
+    - unknown_field
+export:
+  type: csv
+  path: output/small.csv
+

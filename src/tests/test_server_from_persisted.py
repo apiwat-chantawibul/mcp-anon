@@ -34,6 +34,15 @@ async def test_view_pipeline_without_loader(pipeline_file):
 
 
 async def test_view_pipeline_with_transform_error():
-    # Drop non-existent column
-    pass
+    with use_pipeline_file('pipelines/valid/drop-non-existent-column.yaml'):
+        async with Client(app) as client:
+            result = await client.call_tool('pipeline_view')
+            warnings = result.structured_content['warnings'] or []
+            assert any(
+                (
+                    'Can not display schema of resulting dataset' in x
+                    and 'unknown_field' in x
+                )
+                for x in warnings
+            )
 
