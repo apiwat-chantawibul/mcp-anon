@@ -3,8 +3,8 @@ import json
 import pytest
 from click.testing import CliRunner
 
-from app.pipeline import Pipeline
-from app.pipeline.cli import cli
+from mcp_anon.pipeline import Pipeline
+from mcp_anon.pipeline.cli import cli
 
 
 @pytest.mark.parametrize(

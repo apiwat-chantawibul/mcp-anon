@@ -5,7 +5,7 @@ import pytest
 import yaml
 from pydantic import ValidationError
 
-from app.pipeline import Pipeline
+from mcp_anon.pipeline import Pipeline
 
 
 # NOTE: I would love to use workdir fixture,

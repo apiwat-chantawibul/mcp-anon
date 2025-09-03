@@ -5,7 +5,7 @@ import pprint
 import click
 import devtools
 
-from app.dataset.view.schema import get_dataset_schema
+from mcp_anon.dataset.view.schema import get_dataset_schema
 from .pipeline import Pipeline
 
 

@@ -3,8 +3,8 @@ from contextlib import contextmanager
 import pytest
 from fastmcp import Client
 
-from app.server import app
-from app.settings import get_settings
+from mcp_anon.server import app
+from mcp_anon.settings import get_settings
 
 
 @contextmanager

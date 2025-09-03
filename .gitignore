@@ -1,6 +1,6 @@
 # Python-generated files
-**/__pycache__/
-**/*.py[oc]
+__pycache__/
+*.py[oc]
 build/
 dist/
 wheels/
@@ -8,8 +8,4 @@ wheels/
 
 # Virtual environments
 .venv
-
-# Version control
-.git
-**/.gitignore
 

@@ -10,9 +10,9 @@ from pydantic import (
     Field,
 )
 
-from app.pipeline import Pipeline, Load, Transform, Export
-from app.settings import get_settings
-from app.dataset.view.schema import get_dataset_schema, DatasetSchema
+from mcp_anon.pipeline import Pipeline, Load, Transform, Export
+from mcp_anon.settings import get_settings
+from mcp_anon.dataset.view.schema import get_dataset_schema, DatasetSchema
 
 
 class PipelineView(BaseModel):

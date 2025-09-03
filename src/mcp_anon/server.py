@@ -13,10 +13,10 @@ from pydantic import (
 )
 import pandas as pd
 
-from app.state import State, PipelineView
-from app.pipeline import AnyLoad, AnyTransform, AnyExport
-from app.dataset.view.schema import get_dataset_schema, DatasetSchema
-from app.dataset.view.stats import get_dataset_stats, DatasetStats
+from mcp_anon.state import State, PipelineView
+from mcp_anon.pipeline import AnyLoad, AnyTransform, AnyExport
+from mcp_anon.dataset.view.schema import get_dataset_schema, DatasetSchema
+from mcp_anon.dataset.view.stats import get_dataset_stats, DatasetStats
 
 
 @asynccontextmanager

@@ -1,3 +1,35 @@
+[project]
+name = "mcp-anon"
+version = "0.1.0"
+description = "Anonymization Helper MCP server"
+readme = "README.md"
+authors = [
+    { name = "Apiwat Chantawibul", email = "billiska@gmail.com" }
+]
+requires-python = ">=3.13"
+dependencies = [
+    "click>=8.2.1",
+    "devtools>=0.12.2",
+    "fastmcp>=2.12.0",
+    "pandas[performance,sql-other]>=2.3.2",
+    "pyarrow>=21.0.0",
+    "pyyaml>=6.0.2",
+]
+
+[project.scripts]
+anon-runner = "mcp_anon.pipeline.cli:cli"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[dependency-groups]
+dev = [
+    "mypy>=1.17.1",
+    "pytest>=8.4.1",
+    "pytest-asyncio>=1.1.0",
+]
+
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
 cache_dir = "./workdir"
