@@ -30,3 +30,24 @@ USER 1000:1000
 ENTRYPOINT ["fastmcp", "run", "../src/mcp_anon/server.py:app"]
 CMD []
 
+
+FROM base AS prod-builder
+COPY README.md ./
+# Skip tests code
+# TODO: Use --exclude when supported in stable version of Dockerfile
+COPY src/mcp_anon src/mcp_anon
+RUN --mount=type=cache,target=/root/.cache/uv \
+    uv sync --locked --no-dev
+
+
+FROM python:3.13-slim-bookworm AS prod
+COPY --from=prod-builder /opt/app /opt/app
+ENV PATH="/opt/app/.venv/bin:$PATH"
+ENV FASTMCP_HOST=0.0.0.0
+WORKDIR /opt/app/workdir
+RUN chmod 777 .
+USER 1000:1000
+WORKDIR /opt/app/workdir
+ENTRYPOINT ["fastmcp", "run", "../src/mcp_anon/server.py:app"]
+CMD []
+
