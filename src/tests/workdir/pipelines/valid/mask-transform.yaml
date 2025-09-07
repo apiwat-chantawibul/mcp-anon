@@ -1,0 +1,11 @@
+load:
+  type: csv
+  path: datasets/small.csv
+transform:
+  type: sequence
+  sequence:
+  - type: mask
+    field: name
+    # Matches continuous patch of character not `a` or `b`
+    regex: '[^ab]+'
+

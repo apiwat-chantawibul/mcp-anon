@@ -11,6 +11,7 @@ from .pandas import (
     LoadSql,
     BinTransform,
     DropTransform,
+    MaskTransform,
     ExportCsv,
 )
 from .custom_transform import CustomTransform
@@ -40,6 +41,7 @@ AnyTransform = Annotated[
     Union[
         BinTransform,
         DropTransform,
+        MaskTransform,
         CustomTransform[pd.DataFrame],
         # TODO: Include TransformSequence as part of AnyTransform.
         #

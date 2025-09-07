@@ -46,3 +46,10 @@ async def test_view_pipeline_with_transform_error():
                 for x in warnings
             )
 
+
+async def test_mask_transform():
+    with use_pipeline_file('pipelines/valid/mask-transform.yaml'):
+        async with Client(app) as client:
+            result = await client.call_tool('pipeline_view')
+            assert list(app.state.result_dataset['name']) == ['a****', 'b*b']
+
