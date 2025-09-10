@@ -24,7 +24,8 @@ class BinTransform(Transform[pd.DataFrame]):
             If empty, output will replace input field.
         """),
     )
-    bins: int | list[Any] = Field(
+    # TODO: Allow ordered categorical type to be cut
+    bins: int | list[int | float] = Field(
         description = inspect.cleandoc("""
             If integer, define the number of equal-width bins to be automatically created.
             If list, define bin edges.
