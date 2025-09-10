@@ -1,0 +1,3 @@
+# Ignore generated persistent pipelnie definition
+# when using `start-mcp-anon-with-http.sh`
+/pipeline.yaml
