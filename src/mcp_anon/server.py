@@ -4,7 +4,6 @@ from contextlib import asynccontextmanager
 from inspect import cleandoc
 
 from fastmcp import (
-    FastMCP,
     Context,
 )
 from pydantic import (
@@ -17,6 +16,7 @@ from mcp_anon.state import State, PipelineView
 from mcp_anon.pipeline import AnyLoad, AnyTransform, AnyExport
 from mcp_anon.dataset.view.schema import get_dataset_schema, DatasetSchema
 from mcp_anon.dataset.view.stats import get_dataset_stats, DatasetStats
+from mcp_anon.patch.fastmcp import PatchedFastMCP as FastMCP
 
 
 @asynccontextmanager
